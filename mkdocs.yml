@@ -1,0 +1,64 @@
+site_name: go-opentype docs
+site_description: "A pure-Go, zero-dependency TrueType/OpenType text stack: font parsing + rasterisation, Unicode bidi, complex-text shaping, bundled legible fonts."
+site_url: https://go-opentype.github.io/docs/
+repo_url: https://github.com/go-opentype
+repo_name: go-opentype
+edit_uri: ""
+
+theme:
+  name: material
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.instant
+    - content.code.copy
+    - search.suggest
+  palette:
+    # System default (follows the OS preference), then explicit light and dark.
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+extra:
+  version:
+    provider: mike
+    default: latest
+
+nav:
+  - Overview: index.md
+  - opentype: opentype.md
+  - bidi: bidi.md
+  - shape: shape.md
+  - fonts: fonts.md
+  - Guides:
+      - Render text to a PNG: guides/render-text-to-png.md
+      - Shape complex scripts: guides/shape-complex-scripts.md
+      - Choose an accessible font: guides/choose-an-accessible-font.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite

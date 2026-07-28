@@ -1,0 +1,14 @@
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="go-opentype">
+  <defs>
+    <linearGradient id="otgold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F59E0B"/>
+      <stop offset="1" stop-color="#B45309"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#otgold)"/>
+  <g fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M92 56L164 56C175 56 182 67 180 88C177 118 166 148 146 172L128 206L110 172C90 148 79 118 76 88C74 67 81 56 92 56Z" stroke-width="11"/>
+    <circle cx="128" cy="98" r="10" stroke-width="9"/>
+    <line x1="128" y1="120" x2="128" y2="198" stroke-width="11"/>
+  </g>
+</svg>
