@@ -72,6 +72,69 @@ outlines) or the CFF/Type 2 stem grid-fitter (for CFF/CFF2 outlines) before
 rasterisation; `SetStemDarkening(true)` additionally applies CFF stem
 darkening. Both default to off (uniform 4×4-supersampled rendering).
 
+## Mathematical typesetting (the `MATH` table)
+
+`opentype` decodes the OpenType **`MATH`** table: the font-level metrics a
+math-typesetting engine (LuaTeX, unicode-math, MathJax, Word's equation
+editor, or anything built on HarfBuzz's `hb-ot-math`) needs to lay out
+formulas. It has three parts, all exposed pixel-scaled through a `Face`:
+
+- **MathConstants** — around 56 global scalars: the math axis height,
+  subscript/superscript shift and gap minimums, fraction and radical gaps,
+  rule thicknesses, and more, read with `MathConstant` and a `MathConstant`
+  value such as `opentype.AxisHeight` or `opentype.FractionRuleThickness`
+  (see `go doc` for the full, on-disk-ordered list).
+- **MathGlyphInfo** — per-glyph *italic correction* (`ItalicCorrection`, the
+  space to insert after a slanted glyph before an upright one, or the
+  horizontal offset for a subscript that follows a superscript), *top-accent
+  attachment* (`TopAccentAttachment`, the x position at which to centre an
+  accent over a glyph), an *extended-shape* flag (`IsExtendedShapeGlyph`, for
+  glyphs such as a large integral whose superscript is positioned as if the
+  glyph were stretched), and four-corner cut-in *math kerning*
+  (`MathKern`, a step function of the adjacent script's attachment height).
+- **MathVariants** — larger size variants of a glyph and, when even the
+  largest variant isn't big enough, the recipe for assembling an arbitrarily
+  tall or wide stretchy glyph (integrals, braces, radicals, arrows) out of
+  repeatable parts, both returned together by `MathVariants`.
+
+Math *layout* itself — the box model, TeX's math-list rules, choosing a
+variant or growing an assembly to a target size — is a higher-level concern
+built on top of these metrics; it is out of scope for this package, exactly
+as `hb-ot-math` only exposes the metrics and leaves layout to the caller.
+
+```go
+f, err := opentype.Parse(stixTwoMathOTF) // an OpenType math font, e.g. STIX Two Math
+if err != nil {
+    log.Fatal(err)
+}
+if !f.HasMath() {
+    log.Fatal("font carries no MATH table")
+}
+face := f.NewFace(32) // 32px per em
+
+axisHeight := face.MathConstant(opentype.AxisHeight)
+ruleThickness := face.MathConstant(opentype.FractionRuleThickness)
+fmt.Println("axis height:", axisHeight, "fraction rule thickness:", ruleThickness)
+
+// Math-italic glyphs (the U+1D400-U+1D7FF alphanumeric symbols block) commonly
+// carry a nonzero italic correction.
+mathItalicF, _ := f.GlyphIndex('𝑓') // MATHEMATICAL ITALIC SMALL F, U+1D453
+fmt.Println("italic correction:", face.ItalicCorrection(mathItalicF))
+
+// A classic stretchy delimiter exposes both size variants and a glyph
+// assembly a layout engine can grow to any height.
+paren, _ := f.GlyphIndex('(')
+variants, asm := face.MathVariants(paren, true) // true = vertical axis
+fmt.Println("size variants:", len(variants), "assembly parts:", len(asm.Parts))
+```
+
+Run against the real STIX Two Math font at 32px per em, this prints `axis
+height: 8 fraction rule thickness: 2`, `italic correction: 1`, and `size
+variants: 13 assembly parts: 3`. STIX Two Math (SIL Open Font License) is
+bundled as [`testdata/STIXTwoMath-Regular.otf`](https://github.com/go-opentype/opentype/blob/main/testdata/STIXTwoMath-Regular.otf)
+in the `opentype` repository and is checked end-to-end in CI, alongside the
+synthetic MATH-table fixtures that give the decoder 100% branch coverage.
+
 ## API
 
 | Symbol | Purpose |
@@ -94,6 +157,13 @@ darkening. Both default to off (uniform 4×4-supersampled rendering).
 | `(*Face).SetVariation(coords map[string]float64)` | Instance a variable font at the given axis coordinates. |
 | `(*Face).SetHinting(on bool)` / `(*Face).SetStemDarkening(on bool)` | Toggle the TrueType/CFF hinter. |
 | `(*Face).VerticalAdvance(r rune) int` / `(*Face).VerticalOrigin(r rune) (int, bool)` | Vertical writing-mode metrics. |
+| `(*Font).HasMath() bool` | Whether the font carries an OpenType `MATH` table. |
+| `(*Font).IsExtendedShapeGlyph(gid GlyphIndex) bool` | Whether gid is in the `MATH` extended-shape coverage. |
+| `(*Face).MathConstant(which MathConstant) int` | One of ~56 pixel-scaled `MATH` layout constants (axis height, script shifts, fraction/radical gaps, …). |
+| `(*Face).ItalicCorrection(gid GlyphIndex) int` | Per-glyph math italic correction, in pixels. |
+| `(*Face).TopAccentAttachment(gid GlyphIndex) (int, bool)` | X position (pixels) to centre a top accent over gid. |
+| `(*Face).MathKern(gid GlyphIndex, corner MathKernCorner, correctionHeight int) int` | Cut-in math kern (pixels) for one of gid's four corners at a given attachment height. |
+| `(*Face).MathVariants(gid GlyphIndex, vertical bool) ([]MathVariant, *MathAssembly)` | Size variants plus stretchy-glyph assembly for gid along one axis. |
 
 A `Font` is immutable after `Parse` and safe for concurrent use. A `Face`
 caches rasterised glyphs and is **not** safe for concurrent use; build one
@@ -125,6 +195,12 @@ caches rasterised glyphs and is **not** safe for concurrent use; build one
   `SetStemDarkening`
 - `vhea`/`vmtx`/`VORG`-aware vertical metrics and origins for vertical
   writing modes
+- the OpenType **`MATH`** table — math-typesetting metrics (constants,
+  per-glyph italic correction / top-accent attachment / four-corner kerning,
+  and stretchy-glyph size variants and assemblies), exposed pixel-scaled
+  through a `Face` (`HasMath`, `MathConstant`, `ItalicCorrection`,
+  `TopAccentAttachment`, `MathKern`, `MathVariants`,
+  `IsExtendedShapeGlyph`); math *layout* is left to a higher-level engine
 - anti-aliased rasterisation via 4×4 supersampling under the non-zero
   winding rule
 
@@ -136,11 +212,16 @@ nothing above is a stub.
 
 ## Testing
 
-Tests never depend on an external font: they synthesise minimal-but-valid
-TrueType fonts in memory (table directory + `head`/`maxp`/`hhea`/`hmtx`/
-`cmap`/`loca`/`glyf`) to deterministically exercise every parse and raster
-branch, including the error paths. CI enforces **100.0% statement
-coverage**, `go vet`, and a cross-compile smoke over
+Tests never depend on an external font to reach 100% coverage: they
+synthesise minimal-but-valid TrueType and CFF fonts in memory (table
+directory + `head`/`maxp`/`hhea`/`hmtx`/`cmap`/`loca`/`glyf`, or a synthetic
+`MATH` table) to deterministically exercise every parse and raster branch,
+including the error paths. Real-world fonts — Adobe's Source Serif 4 and,
+for the `MATH` table, STIX Two Math (both SIL Open Font License, bundled
+under `testdata/`) — are additionally exercised end-to-end in
+`example_test.go` and a handful of sanity-check tests, so the documented
+examples double as smoke tests against production font data. CI enforces
+**100.0% statement coverage**, `go vet`, and a cross-compile smoke over
 `linux/{amd64,arm64,riscv64,loong64,ppc64le,s390x}`, `js/wasm`,
 `darwin/arm64` and `windows/amd64`.
 

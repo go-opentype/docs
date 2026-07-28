@@ -43,7 +43,9 @@ the paths it covers, it's there today: TrueType `glyf` **and** CFF/CFF2
 outline parsing and rasterisation, every GSUB/GPOS lookup type plus GDEF
 mark filtering, OpenType Variations (`fvar`/`avar`/`gvar`/`HVAR`/`VVAR`/
 `MVAR`), a TrueType instruction hinter and a CFF/Type 2 stem grid-fitter,
-vertical metrics, the full UAX #9 bidi algorithm through rule L2, and
+vertical metrics, the OpenType `MATH` table for math-typesetting metrics
+(mirroring HarfBuzz's `hb-ot-math`), the full UAX #9 bidi algorithm through
+rule L2, and
 complex-text shaping for Arabic, the Indic scripts, the Universal Shaping
 Engine (Thai, Lao, Khmer, Myanmar, Tibetan and more), Egyptian Hieroglyph
 quadrats, Hangul, vertical (CJK tategaki) layout, and Latin/default — see
@@ -62,7 +64,8 @@ go get github.com/go-opentype/fonts
 
 - [opentype](opentype.md) — the sfnt parser and rasteriser: fonts, `cmap`,
   TrueType `glyf` and CFF/CFF2 outlines, variable fonts, GSUB/GPOS shaping,
-  hinting, vertical metrics and the full support matrix.
+  hinting, vertical metrics, the `MATH` table for math typesetting, and the
+  full support matrix.
 - [bidi](bidi.md) — the UAX #9 engine and what it implements vs. defers to a
   shaper.
 - [shape](shape.md) — the complex-text shaper: Arabic cursive joining, Indic
