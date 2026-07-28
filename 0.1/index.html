@@ -696,7 +696,9 @@ the paths it covers, it's there today: TrueType <code>glyf</code> <strong>and</s
 outline parsing and rasterisation, every GSUB/GPOS lookup type plus GDEF
 mark filtering, OpenType Variations (<code>fvar</code>/<code>avar</code>/<code>gvar</code>/<code>HVAR</code>/<code>VVAR</code>/
 <code>MVAR</code>), a TrueType instruction hinter and a CFF/Type 2 stem grid-fitter,
-vertical metrics, the full UAX #9 bidi algorithm through rule L2, and
+vertical metrics, the OpenType <code>MATH</code> table for math-typesetting metrics
+(mirroring HarfBuzz's <code>hb-ot-math</code>), the full UAX #9 bidi algorithm through
+rule L2, and
 complex-text shaping for Arabic, the Indic scripts, the Universal Shaping
 Engine (Thai, Lao, Khmer, Myanmar, Tibetan and more), Egyptian Hieroglyph
 quadrats, Hangul, vertical (CJK tategaki) layout, and Latin/default — see
@@ -711,7 +713,8 @@ each module's page for its exact support matrix.</p>
 <ul>
 <li><a href="opentype/">opentype</a> — the sfnt parser and rasteriser: fonts, <code>cmap</code>,
   TrueType <code>glyf</code> and CFF/CFF2 outlines, variable fonts, GSUB/GPOS shaping,
-  hinting, vertical metrics and the full support matrix.</li>
+  hinting, vertical metrics, the <code>MATH</code> table for math typesetting, and the
+  full support matrix.</li>
 <li><a href="bidi/">bidi</a> — the UAX #9 engine and what it implements vs. defers to a
   shaper.</li>
 <li><a href="shape/">shape</a> — the complex-text shaper: Arabic cursive joining, Indic

@@ -362,6 +362,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mathematical-typesetting-the-math-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mathematical typesetting (the MATH table)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#api" class="md-nav__link">
     <span class="md-ellipsis">
       API
@@ -620,6 +629,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#mathematical-typesetting-the-math-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      Mathematical typesetting (the MATH table)
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#api" class="md-nav__link">
     <span class="md-ellipsis">
       API
@@ -721,6 +739,64 @@ the chosen coordinates; <code>avar</code> axis-value mapping is applied automati
 outlines) or the CFF/Type 2 stem grid-fitter (for CFF/CFF2 outlines) before
 rasterisation; <code>SetStemDarkening(true)</code> additionally applies CFF stem
 darkening. Both default to off (uniform 4×4-supersampled rendering).</p>
+<h2 id="mathematical-typesetting-the-math-table">Mathematical typesetting (the <code>MATH</code> table)<a class="headerlink" href="#mathematical-typesetting-the-math-table" title="Permanent link">&para;</a></h2>
+<p><code>opentype</code> decodes the OpenType <strong><code>MATH</code></strong> table: the font-level metrics a
+math-typesetting engine (LuaTeX, unicode-math, MathJax, Word's equation
+editor, or anything built on HarfBuzz's <code>hb-ot-math</code>) needs to lay out
+formulas. It has three parts, all exposed pixel-scaled through a <code>Face</code>:</p>
+<ul>
+<li><strong>MathConstants</strong> — around 56 global scalars: the math axis height,
+  subscript/superscript shift and gap minimums, fraction and radical gaps,
+  rule thicknesses, and more, read with <code>MathConstant</code> and a <code>MathConstant</code>
+  value such as <code>opentype.AxisHeight</code> or <code>opentype.FractionRuleThickness</code>
+  (see <code>go doc</code> for the full, on-disk-ordered list).</li>
+<li><strong>MathGlyphInfo</strong> — per-glyph <em>italic correction</em> (<code>ItalicCorrection</code>, the
+  space to insert after a slanted glyph before an upright one, or the
+  horizontal offset for a subscript that follows a superscript), <em>top-accent
+  attachment</em> (<code>TopAccentAttachment</code>, the x position at which to centre an
+  accent over a glyph), an <em>extended-shape</em> flag (<code>IsExtendedShapeGlyph</code>, for
+  glyphs such as a large integral whose superscript is positioned as if the
+  glyph were stretched), and four-corner cut-in <em>math kerning</em>
+  (<code>MathKern</code>, a step function of the adjacent script's attachment height).</li>
+<li><strong>MathVariants</strong> — larger size variants of a glyph and, when even the
+  largest variant isn't big enough, the recipe for assembling an arbitrarily
+  tall or wide stretchy glyph (integrals, braces, radicals, arrows) out of
+  repeatable parts, both returned together by <code>MathVariants</code>.</li>
+</ul>
+<p>Math <em>layout</em> itself — the box model, TeX's math-list rules, choosing a
+variant or growing an assembly to a target size — is a higher-level concern
+built on top of these metrics; it is out of scope for this package, exactly
+as <code>hb-ot-math</code> only exposes the metrics and leaves layout to the caller.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">f</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">opentype</span><span class="p">.</span><span class="nx">Parse</span><span class="p">(</span><span class="nx">stixTwoMathOTF</span><span class="p">)</span><span class="w"> </span><span class="c1">// an OpenType math font, e.g. STIX Two Math</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">}</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">if</span><span class="w"> </span><span class="p">!</span><span class="nx">f</span><span class="p">.</span><span class="nx">HasMath</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="s">&quot;font carries no MATH table&quot;</span><span class="p">)</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="p">}</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="nx">face</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">NewFace</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span><span class="w"> </span><span class="c1">// 32px per em</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="nx">axisHeight</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">face</span><span class="p">.</span><span class="nx">MathConstant</span><span class="p">(</span><span class="nx">opentype</span><span class="p">.</span><span class="nx">AxisHeight</span><span class="p">)</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="nx">ruleThickness</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">face</span><span class="p">.</span><span class="nx">MathConstant</span><span class="p">(</span><span class="nx">opentype</span><span class="p">.</span><span class="nx">FractionRuleThickness</span><span class="p">)</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;axis height:&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">axisHeight</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;fraction rule thickness:&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">ruleThickness</span><span class="p">)</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="c1">// Math-italic glyphs (the U+1D400-U+1D7FF alphanumeric symbols block) commonly</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="c1">// carry a nonzero italic correction.</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="nx">mathItalicF</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">GlyphIndex</span><span class="p">(</span><span class="sc">&#39;𝑓&#39;</span><span class="p">)</span><span class="w"> </span><span class="c1">// MATHEMATICAL ITALIC SMALL F, U+1D453</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;italic correction:&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">face</span><span class="p">.</span><span class="nx">ItalicCorrection</span><span class="p">(</span><span class="nx">mathItalicF</span><span class="p">))</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="c1">// A classic stretchy delimiter exposes both size variants and a glyph</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="c1">// assembly a layout engine can grow to any height.</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="nx">paren</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">GlyphIndex</span><span class="p">(</span><span class="sc">&#39;(&#39;</span><span class="p">)</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="nx">variants</span><span class="p">,</span><span class="w"> </span><span class="nx">asm</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">face</span><span class="p">.</span><span class="nx">MathVariants</span><span class="p">(</span><span class="nx">paren</span><span class="p">,</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span><span class="w"> </span><span class="c1">// true = vertical axis</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;size variants:&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">variants</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;assembly parts:&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="nx">asm</span><span class="p">.</span><span class="nx">Parts</span><span class="p">))</span>
+</code></pre></div>
+<p>Run against the real STIX Two Math font at 32px per em, this prints <code>axis
+height: 8 fraction rule thickness: 2</code>, <code>italic correction: 1</code>, and <code>size
+variants: 13 assembly parts: 3</code>. STIX Two Math (SIL Open Font License) is
+bundled as <a href="https://github.com/go-opentype/opentype/blob/main/testdata/STIXTwoMath-Regular.otf"><code>testdata/STIXTwoMath-Regular.otf</code></a>
+in the <code>opentype</code> repository and is checked end-to-end in CI, alongside the
+synthetic MATH-table fixtures that give the decoder 100% branch coverage.</p>
 <h2 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -802,6 +878,34 @@ darkening. Both default to off (uniform 4×4-supersampled rendering).</p>
 <td><code>(*Face).VerticalAdvance(r rune) int</code> / <code>(*Face).VerticalOrigin(r rune) (int, bool)</code></td>
 <td>Vertical writing-mode metrics.</td>
 </tr>
+<tr>
+<td><code>(*Font).HasMath() bool</code></td>
+<td>Whether the font carries an OpenType <code>MATH</code> table.</td>
+</tr>
+<tr>
+<td><code>(*Font).IsExtendedShapeGlyph(gid GlyphIndex) bool</code></td>
+<td>Whether gid is in the <code>MATH</code> extended-shape coverage.</td>
+</tr>
+<tr>
+<td><code>(*Face).MathConstant(which MathConstant) int</code></td>
+<td>One of ~56 pixel-scaled <code>MATH</code> layout constants (axis height, script shifts, fraction/radical gaps, …).</td>
+</tr>
+<tr>
+<td><code>(*Face).ItalicCorrection(gid GlyphIndex) int</code></td>
+<td>Per-glyph math italic correction, in pixels.</td>
+</tr>
+<tr>
+<td><code>(*Face).TopAccentAttachment(gid GlyphIndex) (int, bool)</code></td>
+<td>X position (pixels) to centre a top accent over gid.</td>
+</tr>
+<tr>
+<td><code>(*Face).MathKern(gid GlyphIndex, corner MathKernCorner, correctionHeight int) int</code></td>
+<td>Cut-in math kern (pixels) for one of gid's four corners at a given attachment height.</td>
+</tr>
+<tr>
+<td><code>(*Face).MathVariants(gid GlyphIndex, vertical bool) ([]MathVariant, *MathAssembly)</code></td>
+<td>Size variants plus stretchy-glyph assembly for gid along one axis.</td>
+</tr>
 </tbody>
 </table>
 <p>A <code>Font</code> is immutable after <code>Parse</code> and safe for concurrent use. A <code>Face</code>
@@ -833,6 +937,12 @@ caches rasterised glyphs and is <strong>not</strong> safe for concurrent use; bu
   <code>SetStemDarkening</code></li>
 <li><code>vhea</code>/<code>vmtx</code>/<code>VORG</code>-aware vertical metrics and origins for vertical
   writing modes</li>
+<li>the OpenType <strong><code>MATH</code></strong> table — math-typesetting metrics (constants,
+  per-glyph italic correction / top-accent attachment / four-corner kerning,
+  and stretchy-glyph size variants and assemblies), exposed pixel-scaled
+  through a <code>Face</code> (<code>HasMath</code>, <code>MathConstant</code>, <code>ItalicCorrection</code>,
+  <code>TopAccentAttachment</code>, <code>MathKern</code>, <code>MathVariants</code>,
+  <code>IsExtendedShapeGlyph</code>); math <em>layout</em> is left to a higher-level engine</li>
 <li>anti-aliased rasterisation via 4×4 supersampling under the non-zero
   winding rule</li>
 </ul>
@@ -842,11 +952,16 @@ correctness and portability over the very last drop of small-size sharpness.
 This is a feature-complete engine on the paths HarfBuzz + FreeType cover —
 nothing above is a stub.</p>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
-<p>Tests never depend on an external font: they synthesise minimal-but-valid
-TrueType fonts in memory (table directory + <code>head</code>/<code>maxp</code>/<code>hhea</code>/<code>hmtx</code>/
-<code>cmap</code>/<code>loca</code>/<code>glyf</code>) to deterministically exercise every parse and raster
-branch, including the error paths. CI enforces <strong>100.0% statement
-coverage</strong>, <code>go vet</code>, and a cross-compile smoke over
+<p>Tests never depend on an external font to reach 100% coverage: they
+synthesise minimal-but-valid TrueType and CFF fonts in memory (table
+directory + <code>head</code>/<code>maxp</code>/<code>hhea</code>/<code>hmtx</code>/<code>cmap</code>/<code>loca</code>/<code>glyf</code>, or a synthetic
+<code>MATH</code> table) to deterministically exercise every parse and raster branch,
+including the error paths. Real-world fonts — Adobe's Source Serif 4 and,
+for the <code>MATH</code> table, STIX Two Math (both SIL Open Font License, bundled
+under <code>testdata/</code>) — are additionally exercised end-to-end in
+<code>example_test.go</code> and a handful of sanity-check tests, so the documented
+examples double as smoke tests against production font data. CI enforces
+<strong>100.0% statement coverage</strong>, <code>go vet</code>, and a cross-compile smoke over
 <code>linux/{amd64,arm64,riscv64,loong64,ppc64le,s390x}</code>, <code>js/wasm</code>,
 <code>darwin/arm64</code> and <code>windows/amd64</code>.</p>
 <p>Source: <a href="https://github.com/go-opentype/opentype">github.com/go-opentype/opentype</a> ·
