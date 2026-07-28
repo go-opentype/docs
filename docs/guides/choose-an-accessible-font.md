@@ -1,6 +1,6 @@
 # Guide: choose an accessible font
 
-[`fonts`](../fonts.md) bundles six families so a Go program can ship legible
+[`fonts`](../fonts.md) bundles 44 families so a Go program can ship legible
 text without sourcing or downloading a `.ttf`. This guide is about picking
 the right one — not just the default.
 
@@ -31,14 +31,17 @@ for _, fam := range fonts.All() {
 }
 ```
 
-Or look one up by name directly:
+Or look one up by name to discover its import path (`Family` carries no
+`[]byte` — enumerating or searching families never links their bytes in;
+you still import the subpackage to reach the bytes themselves):
 
 ```go
-ttf, ok := fonts.ByName("Lora") // case-insensitive
-if !ok {
-    ttf = fonts.MostLegible() // sensible fallback
+fam, ok := fonts.ByName("Lora") // case-insensitive
+if ok {
+    fmt.Println(fam.ImportPath) // github.com/go-opentype/fonts/lora
 }
-f, err := fonts.Parse(ttf)
+// import "github.com/go-opentype/fonts/lora", then:
+f, err := fonts.Parse(lora.TTF)
 ```
 
 ## What's bundled, and why you'd pick it
@@ -57,12 +60,14 @@ f, err := fonts.Parse(ttf)
 Inter, Lora, and JetBrains Mono ship as **variable fonts** upstream (a
 single file spanning a weight/width axis range). `go-opentype/fonts` pins
 each to its **default static instance** — the `.ttf` bundled here is one
-fixed weight, not the full variable range — because
-[`opentype` has no OpenType Variations support](../opentype.md#support-matrix).
-If your design needs a specific weight along an axis (e.g. Inter at 600
-rather than its default 400), that isn't reachable through this package
-today; you'd need to source that static instance yourself until variable-font
-support lands.
+fixed weight, not the full variable range — to keep the bundle simple and
+small, not because the engine can't handle axes:
+[`opentype` fully supports OpenType Variations](../opentype.md#variable-fonts),
+including `SetVariation` to instance any axis coordinate. If your design
+needs a specific weight along an axis (e.g. Inter at 600 rather than its
+default 400), source that family's variable `.ttf` yourself — from
+[google/fonts](https://github.com/google/fonts), for instance — and drive it
+with `opentype.Parse` + `(*Face).SetVariation(map[string]float64{"wght": 600})`.
 
 ## License obligations
 

@@ -78,11 +78,38 @@ you don't want triggering cursive joining:
 glyphs := shape.Shape(face, text, shape.Options{Script: "latn"})
 ```
 
-## What's not covered yet
+## Indic and Universal Shaping Engine scripts
 
-Indic, Thai/Lao, Khmer, Myanmar, and anything needing the Universal Shaping
-Engine fall back to the default (unreordered) path today — see
-[shape's scope](../shape.md#scope). If your text is confined to Arabic and
-Latin/default scripts (which also covers Cyrillic, Greek, and CJK without
-reordering needs), `shape.Shape` is a complete solution; otherwise treat the
-output as best-effort for those scripts.
+Devanagari, Bengali, Tamil, and the rest of the ten dedicated-shaper Indic
+scripts get the full HarfBuzz "indic" model: syllable splitting, base/reph
+detection, the pre-base-matra and reph reordering passes, and the layered
+GSUB/GPOS feature pipeline (including mark/mkmk/abvm/blwm attachment):
+
+```go
+glyphs := shape.Shape(face, "नमस्ते", shape.Options{}) // Devanagari "hello"
+```
+
+Thai, Lao, Khmer, Myanmar, Tibetan and the rest of the scripts without a
+bespoke shaper go through the Universal Shaping Engine (USE), which
+classifies each run into syllabic categories, splits it into clusters,
+reorders pre-base vowels/modifiers and repha, and runs the USE GSUB/GPOS
+pipeline (with sakot/halant joining, split-vowel decomposition, and
+dotted-circle insertion for defective clusters) — no code changes needed
+beyond calling `shape.Shape`, since script detection is automatic. See
+[shape's scope](../shape.md#scope) for the full list of scripts each model
+covers.
+
+## Vertical (CJK tategaki) and other scripts
+
+Egyptian Hieroglyph quadrats and Hangul jamo composition are also handled
+automatically from the script of the input text. For vertical writing mode
+(CJK tategaki — top-to-bottom, `vert`/`vrt2` glyph forms), set
+`Options.Vertical`:
+
+```go
+glyphs := shape.Shape(face, "こんにちは", shape.Options{Vertical: true})
+```
+
+`shape.Shape` is a complete solution across all of these paths — Arabic,
+Indic, USE, Egyptian Hieroglyphs, Hangul, vertical, and Latin/default
+(which also covers Cyrillic, Greek, and horizontal CJK).

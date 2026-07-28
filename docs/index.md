@@ -18,7 +18,7 @@ packages and no cgo anywhere in the stack.
 | [`opentype`](opentype.md) | `github.com/go-opentype/opentype` | the engine — sfnt parsing + anti-aliased rasterisation |
 | [`bidi`](bidi.md) | `github.com/go-opentype/bidi` | the Unicode Bidirectional Algorithm (UAX #9) |
 | [`shape`](shape.md) | `github.com/go-opentype/shape` | a HarfBuzz-lite complex-text shaper composing the two above |
-| [`fonts`](fonts.md) | `github.com/go-opentype/fonts` | six bundled, legible, `go:embed`ded font families |
+| [`fonts`](fonts.md) | `github.com/go-opentype/fonts` | 44 bundled, legible, per-family `go:embed`ded font families |
 | [`docs`](https://github.com/go-opentype/docs) | — | this documentation site (MkDocs Material, versioned with mike) |
 | [`brand`](https://github.com/go-opentype/brand) | — | logo and brand assets |
 
@@ -38,13 +38,16 @@ glyphs into a pixel buffer:
 - `golang.org/x/text/unicode/bidi` for laying out mixed left-to-right /
   right-to-left text.
 
-The long-term aim on the paths it covers is functional parity with the
-HarfBuzz + FreeType pair. Today that means TrueType `glyf` outline parsing
-and rasterisation, the full UAX #9 bidi algorithm through rule L2, and
-Arabic + Latin/default complex-text shaping. **CFF/CFF2 outlines, full
-GSUB/GPOS positioning, hinting, vertical metrics and OpenType Variations
-(variable fonts) are tracked as roadmap** — see each module's page for its
-exact support matrix; nothing here overstates what ships today.
+The stack targets functional parity with the HarfBuzz + FreeType pair, and on
+the paths it covers, it's there today: TrueType `glyf` **and** CFF/CFF2
+outline parsing and rasterisation, every GSUB/GPOS lookup type plus GDEF
+mark filtering, OpenType Variations (`fvar`/`avar`/`gvar`/`HVAR`/`VVAR`/
+`MVAR`), a TrueType instruction hinter and a CFF/Type 2 stem grid-fitter,
+vertical metrics, the full UAX #9 bidi algorithm through rule L2, and
+complex-text shaping for Arabic, the Indic scripts, the Universal Shaping
+Engine (Thai, Lao, Khmer, Myanmar, Tibetan and more), Egyptian Hieroglyph
+quadrats, Hangul, vertical (CJK tategaki) layout, and Latin/default — see
+each module's page for its exact support matrix.
 
 ## Install
 
@@ -58,14 +61,16 @@ go get github.com/go-opentype/fonts
 ## Where to go next
 
 - [opentype](opentype.md) — the sfnt parser and rasteriser: fonts, `cmap`,
-  `glyf` outlines, and the current CFF/CFF2/GSUB/GPOS/hinting/vertical-metrics
-  support matrix.
+  TrueType `glyf` and CFF/CFF2 outlines, variable fonts, GSUB/GPOS shaping,
+  hinting, vertical metrics and the full support matrix.
 - [bidi](bidi.md) — the UAX #9 engine and what it implements vs. defers to a
   shaper.
-- [shape](shape.md) — the complex-text shaper: Arabic cursive joining,
-  ligatures, mark attachment, kerning, and which scripts it covers.
-- [fonts](fonts.md) — the six bundled families and the two-line API to reach
-  them.
+- [shape](shape.md) — the complex-text shaper: Arabic cursive joining, Indic
+  reordering, the Universal Shaping Engine, Egyptian Hieroglyph quadrats,
+  Hangul, vertical layout, ligatures, mark attachment, kerning, and which
+  scripts it covers.
+- [fonts](fonts.md) — the 44 bundled families and the per-family import
+  model to reach them.
 - **Guides** — task-oriented walkthroughs: rendering text to a PNG, shaping a
   mixed-direction Arabic string, and picking a bundled font for legibility.
 
