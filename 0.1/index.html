@@ -663,7 +663,7 @@ whole stack cross-compile trivially to any Go target, including
 <tr>
 <td><a href="fonts/"><code>fonts</code></a></td>
 <td><code>github.com/go-opentype/fonts</code></td>
-<td>six bundled, legible, <code>go:embed</code>ded font families</td>
+<td>44 bundled, legible, per-family <code>go:embed</code>ded font families</td>
 </tr>
 <tr>
 <td><a href="https://github.com/go-opentype/docs"><code>docs</code></a></td>
@@ -691,13 +691,16 @@ glyphs into a pixel buffer:</p>
 <li><code>golang.org/x/text/unicode/bidi</code> for laying out mixed left-to-right /
   right-to-left text.</li>
 </ul>
-<p>The long-term aim on the paths it covers is functional parity with the
-HarfBuzz + FreeType pair. Today that means TrueType <code>glyf</code> outline parsing
-and rasterisation, the full UAX #9 bidi algorithm through rule L2, and
-Arabic + Latin/default complex-text shaping. <strong>CFF/CFF2 outlines, full
-GSUB/GPOS positioning, hinting, vertical metrics and OpenType Variations
-(variable fonts) are tracked as roadmap</strong> — see each module's page for its
-exact support matrix; nothing here overstates what ships today.</p>
+<p>The stack targets functional parity with the HarfBuzz + FreeType pair, and on
+the paths it covers, it's there today: TrueType <code>glyf</code> <strong>and</strong> CFF/CFF2
+outline parsing and rasterisation, every GSUB/GPOS lookup type plus GDEF
+mark filtering, OpenType Variations (<code>fvar</code>/<code>avar</code>/<code>gvar</code>/<code>HVAR</code>/<code>VVAR</code>/
+<code>MVAR</code>), a TrueType instruction hinter and a CFF/Type 2 stem grid-fitter,
+vertical metrics, the full UAX #9 bidi algorithm through rule L2, and
+complex-text shaping for Arabic, the Indic scripts, the Universal Shaping
+Engine (Thai, Lao, Khmer, Myanmar, Tibetan and more), Egyptian Hieroglyph
+quadrats, Hangul, vertical (CJK tategaki) layout, and Latin/default — see
+each module's page for its exact support matrix.</p>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>go<span class="w"> </span>get<span class="w"> </span>github.com/go-opentype/opentype
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>go<span class="w"> </span>get<span class="w"> </span>github.com/go-opentype/bidi
@@ -707,14 +710,16 @@ exact support matrix; nothing here overstates what ships today.</p>
 <h2 id="where-to-go-next">Where to go next<a class="headerlink" href="#where-to-go-next" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="opentype/">opentype</a> — the sfnt parser and rasteriser: fonts, <code>cmap</code>,
-  <code>glyf</code> outlines, and the current CFF/CFF2/GSUB/GPOS/hinting/vertical-metrics
-  support matrix.</li>
+  TrueType <code>glyf</code> and CFF/CFF2 outlines, variable fonts, GSUB/GPOS shaping,
+  hinting, vertical metrics and the full support matrix.</li>
 <li><a href="bidi/">bidi</a> — the UAX #9 engine and what it implements vs. defers to a
   shaper.</li>
-<li><a href="shape/">shape</a> — the complex-text shaper: Arabic cursive joining,
-  ligatures, mark attachment, kerning, and which scripts it covers.</li>
-<li><a href="fonts/">fonts</a> — the six bundled families and the two-line API to reach
-  them.</li>
+<li><a href="shape/">shape</a> — the complex-text shaper: Arabic cursive joining, Indic
+  reordering, the Universal Shaping Engine, Egyptian Hieroglyph quadrats,
+  Hangul, vertical layout, ligatures, mark attachment, kerning, and which
+  scripts it covers.</li>
+<li><a href="fonts/">fonts</a> — the 44 bundled families and the per-family import
+  model to reach them.</li>
 <li><strong>Guides</strong> — task-oriented walkthroughs: rendering text to a PNG, shaping a
   mixed-direction Arabic string, and picking a bundled font for legibility.</li>
 </ul>

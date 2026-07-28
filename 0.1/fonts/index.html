@@ -395,6 +395,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#the-lazy-at-compile-time-import-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      The lazy-at-compile-time import model
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#bundled-fonts" class="md-nav__link">
     <span class="md-ellipsis">
       Bundled fonts
@@ -566,6 +575,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#the-lazy-at-compile-time-import-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      The lazy-at-compile-time import model
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#bundled-fonts" class="md-nav__link">
     <span class="md-ellipsis">
       Bundled fonts
@@ -608,27 +626,57 @@
 
 
 <h1 id="fonts-bundled-legible-families">fonts — bundled legible families<a class="headerlink" href="#fonts-bundled-legible-families" title="Permanent link">&para;</a></h1>
-<p><code>github.com/go-opentype/fonts</code> provides six legible, permissively-licensed
-TrueType fonts, embedded as <code>[]byte</code> payloads with a two-line API — no
-downloading, no sourcing a <code>.ttf</code> yourself. Built for
-<a href="../opentype/">opentype</a>, the pure-Go, stdlib-only TrueType engine, but the
-raw bytes work with any parser that accepts a <code>.ttf</code>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="s">&quot;github.com/go-opentype/fonts&quot;</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nx">f</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fonts</span><span class="p">.</span><span class="nx">Parse</span><span class="p">(</span><span class="nx">fonts</span><span class="p">.</span><span class="nx">MostLegible</span><span class="p">())</span><span class="w"> </span><span class="c1">// *opentype.Font</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="nx">face</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">NewFace</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span><span class="w">                      </span><span class="c1">// 16px face</span>
+<p><code>github.com/go-opentype/fonts</code> provides 44 legible, permissively-licensed
+TrueType fonts, one Go subpackage per family, each with its own
+<code>//go:embed</code> — no downloading, no sourcing a <code>.ttf</code> yourself, and <strong>your
+binary links only the families you import</strong>. Coverage spans Latin,
+Cyrillic and Greek plus seven non-Latin scripts — Arabic and Hebrew (RTL),
+Devanagari, Thai, Georgian, Armenian and Egyptian Hieroglyphs — plus Noto
+Sans SC for CJK (Han ideographs, kana and common CJK punctuation). Built
+for <a href="../opentype/">opentype</a>, the pure-Go, stdlib-only TrueType engine, but
+the raw bytes work with any parser that accepts a <code>.ttf</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="s">&quot;github.com/go-opentype/fonts&quot;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="s">&quot;github.com/go-opentype/fonts/inter&quot;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">)</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nx">f</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fonts</span><span class="p">.</span><span class="nx">Parse</span><span class="p">(</span><span class="nx">inter</span><span class="p">.</span><span class="nx">TTF</span><span class="p">)</span><span class="w"> </span><span class="c1">// *opentype.Font</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="nx">face</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">NewFace</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span><span class="w">            </span><span class="c1">// 16px face</span>
 </code></pre></div>
-<p>Pure Go, no cgo, no external assets to fetch at build or run time — the
-fonts are <code>//go:embed</code>ded into the module.</p>
+<p>Pure Go, no cgo, no external assets to fetch at build or run time — every
+family is <code>//go:embed</code>ded into its own subpackage.</p>
+<h2 id="the-lazy-at-compile-time-import-model">The lazy-at-compile-time import model<a class="headerlink" href="#the-lazy-at-compile-time-import-model" title="Permanent link">&para;</a></h2>
+<p><code>//go:embed</code> is eager <em>per package</em>: any package that embeds a font links
+that font's bytes into every binary that imports it, whether or not the
+binary ever uses it. A <code>fonts</code> package that bulk-embedded all 44 families
+would put all 44 into your binary the moment you imported it for anything
+at all.</p>
+<p>So the root <code>fonts</code> package doesn't do that. Each family lives in its own
+subpackage — <code>fonts/inter</code>, <code>fonts/roboto</code>, <code>fonts/jetbrainsmono</code>, and so
+on — with its own <code>//go:embed</code>. Importing <code>fonts/inter</code> links only Inter.
+Importing ten subpackages links only those ten.</p>
+<p>The root <code>fonts</code> package holds two things only:</p>
+<ol>
+<li><strong><a href="#api"><code>Family</code></a> metadata</strong> — name, <a href="#api"><code>Kind</code></a>, license, and import
+   path for every bundled font, returned by <code>All</code> and <code>ByName</code>. No
+   <code>[]byte</code> field: enumerating families never links any of them in.</li>
+<li><strong><a href="#api"><code>MostLegible</code></a></strong> — the one family embedded directly in the root
+   package, so there's a sensible zero-extra-imports default. Every other
+   family requires importing its own subpackage.</li>
+</ol>
 <h2 id="bundled-fonts">Bundled fonts<a class="headerlink" href="#bundled-fonts" title="Permanent link">&para;</a></h2>
+<p>Six families are hand-curated (present since v0.1.0); the other thirty-eight
+were ingested from <a href="https://github.com/google/fonts">google/fonts</a>. Seven
+non-Latin families (Arabic, Hebrew, Devanagari, Thai, Georgian, Armenian,
+Egyptian Hieroglyphs) and Noto Sans SC (the bundled CJK family) round out
+script coverage beyond Latin/Cyrillic/Greek.</p>
 <table>
 <thead>
 <tr>
 <th>Name</th>
 <th>Kind</th>
 <th>License</th>
-<th>Copyright</th>
-<th>Upstream</th>
+<th>Import path</th>
 </tr>
 </thead>
 <tbody>
@@ -636,63 +684,115 @@ fonts are <code>//go:embed</code>ded into the module.</p>
 <td>Atkinson Hyperlegible</td>
 <td>Sans</td>
 <td>OFL-1.1</td>
-<td>Copyright 2020 Braille Institute of America, Inc.</td>
-<td><a href="https://brailleinstitute.org/freefont">https://brailleinstitute.org/freefont</a></td>
+<td><code>github.com/go-opentype/fonts/atkinsonhyperlegible</code></td>
 </tr>
 <tr>
 <td>Inter</td>
 <td>Sans</td>
 <td>OFL-1.1</td>
-<td>Copyright 2020 The Inter Project Authors</td>
-<td><a href="https://github.com/rsms/inter">https://github.com/rsms/inter</a></td>
+<td><code>github.com/go-opentype/fonts/inter</code></td>
 </tr>
 <tr>
 <td>Go</td>
 <td>Sans</td>
 <td>BSD-3-Clause</td>
-<td>Copyright (c) 2016 Bigelow &amp; Holmes Inc. All rights reserved.</td>
-<td><a href="https://go.dev/blog/go-fonts">https://go.dev/blog/go-fonts</a></td>
+<td><code>github.com/go-opentype/fonts/goregular</code></td>
 </tr>
 <tr>
 <td>Lora</td>
 <td>Serif</td>
 <td>OFL-1.1</td>
-<td>Copyright 2011 The Lora Project Authors, with Reserved Font Name "Lora"</td>
-<td><a href="https://github.com/cyrealtype/Lora-Cyrillic">https://github.com/cyrealtype/Lora-Cyrillic</a></td>
+<td><code>github.com/go-opentype/fonts/lora</code></td>
 </tr>
 <tr>
 <td>Go Mono</td>
 <td>Mono</td>
 <td>BSD-3-Clause</td>
-<td>Copyright (c) 2016 Bigelow &amp; Holmes Inc. All rights reserved.</td>
-<td><a href="https://go.dev/blog/go-fonts">https://go.dev/blog/go-fonts</a></td>
+<td><code>github.com/go-opentype/fonts/gomono</code></td>
 </tr>
 <tr>
 <td>JetBrains Mono</td>
 <td>Mono</td>
 <td>OFL-1.1</td>
-<td>Copyright 2020 The JetBrains Mono Project Authors</td>
-<td><a href="https://github.com/JetBrains/JetBrainsMono">https://github.com/JetBrains/JetBrainsMono</a></td>
+<td><code>github.com/go-opentype/fonts/jetbrainsmono</code></td>
+</tr>
+<tr>
+<td>Noto Sans Arabic (RTL)</td>
+<td>Sans</td>
+<td>OFL-1.1</td>
+<td><code>github.com/go-opentype/fonts/notosansarabic</code></td>
+</tr>
+<tr>
+<td>Noto Sans Hebrew (RTL)</td>
+<td>Sans</td>
+<td>OFL-1.1</td>
+<td><code>github.com/go-opentype/fonts/notosanshebrew</code></td>
+</tr>
+<tr>
+<td>Noto Sans Devanagari</td>
+<td>Sans</td>
+<td>OFL-1.1</td>
+<td><code>github.com/go-opentype/fonts/notosansdevanagari</code></td>
+</tr>
+<tr>
+<td>Noto Sans Thai</td>
+<td>Sans</td>
+<td>OFL-1.1</td>
+<td><code>github.com/go-opentype/fonts/notosansthai</code></td>
+</tr>
+<tr>
+<td>Noto Sans Georgian</td>
+<td>Sans</td>
+<td>OFL-1.1</td>
+<td><code>github.com/go-opentype/fonts/notosansgeorgian</code></td>
+</tr>
+<tr>
+<td>Noto Sans Armenian</td>
+<td>Sans</td>
+<td>OFL-1.1</td>
+<td><code>github.com/go-opentype/fonts/notosansarmenian</code></td>
+</tr>
+<tr>
+<td>Noto Sans Egyptian Hieroglyphs</td>
+<td>Sans</td>
+<td>OFL-1.1</td>
+<td><code>github.com/go-opentype/fonts/notosansegyptianhieroglyphs</code></td>
+</tr>
+<tr>
+<td>Noto Sans SC (CJK)</td>
+<td>Sans</td>
+<td>OFL-1.1</td>
+<td><code>github.com/go-opentype/fonts/notosanssc</code></td>
+</tr>
+<tr>
+<td>… 30 more Latin/Cyrillic/Greek families (Roboto, Open Sans, Montserrat, Fira Sans/Code, IBM Plex, …)</td>
+<td>Sans/Serif/Mono</td>
+<td>OFL-1.1</td>
+<td>see <a href="https://pkg.go.dev/github.com/go-opentype/fonts">pkg.go.dev</a> for the full list</td>
 </tr>
 </tbody>
 </table>
-<p>Full license texts are bundled verbatim under <code>licenses/</code>:
-<code>AtkinsonHyperlegible-OFL.txt</code>, <code>Inter-OFL.txt</code>, <code>Lora-OFL.txt</code>,
-<code>JetBrainsMono-OFL.txt</code> (SIL Open Font License 1.1) and
-<code>GoFonts-LICENSE.txt</code> (BSD-3-Clause, Bigelow &amp; Holmes).</p>
+<p>Full license texts are bundled verbatim under <code>licenses/</code> — one file per
+family (SIL Open Font License 1.1 for every <code>OFL-1.1</code> row, plus
+<code>GoFonts-LICENSE.txt</code> — BSD-3-Clause, Bigelow &amp; Holmes — shared by Go and
+Go Mono).</p>
 <div class="admonition success">
 <p class="admonition-title">The default: Atkinson Hyperlegible</p>
 <p>Designed by the Braille Institute specifically to maximize character
 distinction for readers with low vision, benefiting every reader in the
-process. <a href="#api"><code>MostLegible()</code></a> returns it.</p>
+process. <a href="#api"><code>MostLegible()</code></a> returns it, and it's the only family
+embedded directly in the root package.</p>
 </div>
-<div class="admonition warning">
-<p class="admonition-title">No variable-font support</p>
-<p><strong>Inter</strong>, <strong>Lora</strong>, and <strong>JetBrains Mono</strong> are variable fonts upstream;
-the bundled <code>.ttf</code> files are pinned at each family's default master
-(static instance). <code>go-opentype</code> has no variable-font support (see
-<a href="../opentype/#support-matrix">opentype</a>), so it always renders that
-default instance — OpenType Variations axes are not applied.</p>
+<div class="admonition info">
+<p class="admonition-title">Bundled instances are static; the engine itself supports variable fonts</p>
+<p><strong>Inter</strong>, <strong>Lora</strong>, <strong>JetBrains Mono</strong>, and most of the
+<code>google/fonts</code>-ingested set are variable fonts upstream; each bundled
+<code>.ttf</code> is pinned at that family's default master (static instance) to
+keep the bundle simple and small. That's a packaging choice, not an
+engine limitation — <a href="../opentype/#variable-fonts">opentype</a> fully
+supports OpenType Variations via <code>(*Face).SetVariation</code>. If you need a
+specific axis coordinate (e.g. Inter at weight 600), source that
+family's variable <code>.ttf</code> yourself and parse it with <code>opentype.Parse</code>.</p>
 </div>
 <h2 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Kind</span><span class="w"> </span><span class="kt">int</span>
@@ -701,32 +801,32 @@ default instance — OpenType Variations axes are not applied.</p>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nx">KindSans</span><span class="w"> </span><span class="nx">Kind</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">iota</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="nx">KindSerif</span>
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nx">KindMono</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">)</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Family</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="nx">Name</span><span class="w">    </span><span class="kt">string</span><span class="w"> </span><span class="c1">// e.g. &quot;Atkinson Hyperlegible&quot;</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="nx">Kind</span><span class="w">    </span><span class="nx">Kind</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="nx">License</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="c1">// SPDX id: &quot;OFL-1.1&quot; or &quot;BSD-3-Clause&quot;</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="nx">TTF</span><span class="w">     </span><span class="p">[]</span><span class="kt">byte</span><span class="w"> </span><span class="c1">// raw .ttf bytes</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="p">}</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="kd">func</span><span class="w"> </span><span class="nx">AtkinsonHyperlegible</span><span class="p">()</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Inter</span><span class="p">()</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="kd">func</span><span class="w"> </span><span class="nx">GoRegular</span><span class="p">()</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Lora</span><span class="p">()</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="kd">func</span><span class="w"> </span><span class="nx">GoMono</span><span class="p">()</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span>
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="kd">func</span><span class="w"> </span><span class="nx">JetBrainsMono</span><span class="p">()</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span>
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="kd">func</span><span class="w"> </span><span class="nx">MostLegible</span><span class="p">()</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="w">                    </span><span class="c1">// == AtkinsonHyperlegible()</span>
-<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="kd">func</span><span class="w"> </span><span class="nx">All</span><span class="p">()</span><span class="w"> </span><span class="p">[]</span><span class="nx">Family</span><span class="w">                          </span><span class="c1">// every bundled family, stable order</span>
-<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="kd">func</span><span class="w"> </span><span class="nx">ByName</span><span class="p">(</span><span class="nx">name</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span><span class="w">      </span><span class="c1">// case-insensitive lookup by Family.Name</span>
-<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Parse</span><span class="p">(</span><span class="nx">ttf</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">opentype</span><span class="p">.</span><span class="nx">Font</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="c1">// convenience wrapper over opentype.Parse</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nx">KindDisplay</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">)</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1">// Family is metadata only — no font bytes. Fetch bytes via ImportPath.</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Family</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="nx">Name</span><span class="w">       </span><span class="kt">string</span><span class="w"> </span><span class="c1">// e.g. &quot;Inter&quot;</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="nx">Kind</span><span class="w">       </span><span class="nx">Kind</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="nx">License</span><span class="w">    </span><span class="kt">string</span><span class="w"> </span><span class="c1">// SPDX id: &quot;OFL-1.1&quot; or &quot;BSD-3-Clause&quot;</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="nx">ImportPath</span><span class="w"> </span><span class="kt">string</span><span class="w"> </span><span class="c1">// e.g. &quot;github.com/go-opentype/fonts/inter&quot;</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="p">}</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="kd">func</span><span class="w"> </span><span class="nx">All</span><span class="p">()</span><span class="w"> </span><span class="p">[]</span><span class="nx">Family</span><span class="w">                        </span><span class="c1">// every bundled family&#39;s metadata, stable order</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="kd">func</span><span class="w"> </span><span class="nx">ByName</span><span class="p">(</span><span class="nx">name</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="nx">Family</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="p">)</span><span class="w">     </span><span class="c1">// case-insensitive lookup by Family.Name</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="kd">func</span><span class="w"> </span><span class="nx">MostLegible</span><span class="p">()</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="w">                   </span><span class="c1">// Atkinson Hyperlegible bytes — the one family embedded here</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Parse</span><span class="p">(</span><span class="nx">ttf</span><span class="w"> </span><span class="p">[]</span><span class="kt">byte</span><span class="p">)</span><span class="w"> </span><span class="p">(</span><span class="o">*</span><span class="nx">opentype</span><span class="p">.</span><span class="nx">Font</span><span class="p">,</span><span class="w"> </span><span class="kt">error</span><span class="p">)</span><span class="w"> </span><span class="c1">// convenience wrapper over opentype.Parse</span>
 </code></pre></div>
+<p>Every other family's bytes live in its own subpackage as <code>var TTF []byte</code>,
+e.g. <code>inter.TTF</code>, <code>roboto.TTF</code>, <code>jetbrainsmono.TTF</code> — see the table above
+and <a href="https://pkg.go.dev/github.com/go-opentype/fonts">pkg.go.dev</a> for the
+full list of import paths.</p>
 <h2 id="license">License<a class="headerlink" href="#license" title="Permanent link">&para;</a></h2>
-<p>The Go source code in the repository (everything outside <code>ttf/</code> and
-<code>licenses/</code>) is BSD-3-Clause. The bundled font files keep their own
-upstream licenses; see the table above and <code>licenses/</code> for the full texts,
-copyright notices, and (for the OFL fonts) their Reserved Font Names.</p>
+<p>The Go source code in the repository (everything outside the bundled
+<code>.ttf</code> files and <code>licenses/</code>) is BSD-3-Clause. The bundled font files keep
+their own upstream licenses; see the table above and <code>licenses/</code> for the
+full texts, copyright notices, and (for the OFL fonts) their Reserved Font
+Names.</p>
 <p>Source: <a href="https://github.com/go-opentype/fonts">github.com/go-opentype/fonts</a> ·
 <a href="https://pkg.go.dev/github.com/go-opentype/fonts">pkg.go.dev</a></p>
 

@@ -644,7 +644,7 @@
 
 
 <h1 id="guide-choose-an-accessible-font">Guide: choose an accessible font<a class="headerlink" href="#guide-choose-an-accessible-font" title="Permanent link">&para;</a></h1>
-<p><a href="../../fonts/"><code>fonts</code></a> bundles six families so a Go program can ship legible
+<p><a href="../../fonts/"><code>fonts</code></a> bundles 44 families so a Go program can ship legible
 text without sourcing or downloading a <code>.ttf</code>. This guide is about picking
 the right one — not just the default.</p>
 <h2 id="just-want-something-legible-use-the-default">Just want something legible? Use the default<a class="headerlink" href="#just-want-something-legible-use-the-default" title="Permanent link">&para;</a></h2>
@@ -666,12 +666,15 @@ than hardcode a name:</p>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="p">}</span>
 </code></pre></div>
-<p>Or look one up by name directly:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">ttf</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fonts</span><span class="p">.</span><span class="nx">ByName</span><span class="p">(</span><span class="s">&quot;Lora&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// case-insensitive</span>
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">if</span><span class="w"> </span><span class="p">!</span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nx">ttf</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nx">fonts</span><span class="p">.</span><span class="nx">MostLegible</span><span class="p">()</span><span class="w"> </span><span class="c1">// sensible fallback</span>
+<p>Or look one up by name to discover its import path (<code>Family</code> carries no
+<code>[]byte</code> — enumerating or searching families never links their bytes in;
+you still import the subpackage to reach the bytes themselves):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nx">fam</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fonts</span><span class="p">.</span><span class="nx">ByName</span><span class="p">(</span><span class="s">&quot;Lora&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// case-insensitive</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">fam</span><span class="p">.</span><span class="nx">ImportPath</span><span class="p">)</span><span class="w"> </span><span class="c1">// github.com/go-opentype/fonts/lora</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">}</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nx">f</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fonts</span><span class="p">.</span><span class="nx">Parse</span><span class="p">(</span><span class="nx">ttf</span><span class="p">)</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="c1">// import &quot;github.com/go-opentype/fonts/lora&quot;, then:</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="nx">f</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">fonts</span><span class="p">.</span><span class="nx">Parse</span><span class="p">(</span><span class="nx">lora</span><span class="p">.</span><span class="nx">TTF</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="whats-bundled-and-why-youd-pick-it">What's bundled, and why you'd pick it<a class="headerlink" href="#whats-bundled-and-why-youd-pick-it" title="Permanent link">&para;</a></h2>
 <table>
@@ -719,12 +722,14 @@ than hardcode a name:</p>
 <p>Inter, Lora, and JetBrains Mono ship as <strong>variable fonts</strong> upstream (a
 single file spanning a weight/width axis range). <code>go-opentype/fonts</code> pins
 each to its <strong>default static instance</strong> — the <code>.ttf</code> bundled here is one
-fixed weight, not the full variable range — because
-<a href="../../opentype/#support-matrix"><code>opentype</code> has no OpenType Variations support</a>.
-If your design needs a specific weight along an axis (e.g. Inter at 600
-rather than its default 400), that isn't reachable through this package
-today; you'd need to source that static instance yourself until variable-font
-support lands.</p>
+fixed weight, not the full variable range — to keep the bundle simple and
+small, not because the engine can't handle axes:
+<a href="../../opentype/#variable-fonts"><code>opentype</code> fully supports OpenType Variations</a>,
+including <code>SetVariation</code> to instance any axis coordinate. If your design
+needs a specific weight along an axis (e.g. Inter at 600 rather than its
+default 400), source that family's variable <code>.ttf</code> yourself — from
+<a href="https://github.com/google/fonts">google/fonts</a>, for instance — and drive it
+with <code>opentype.Parse</code> + <code>(*Face).SetVariation(map[string]float64{"wght": 600})</code>.</p>
 <h2 id="license-obligations">License obligations<a class="headerlink" href="#license-obligations" title="Permanent link">&para;</a></h2>
 <p>The Go source in <code>fonts</code> is BSD-3-Clause, but the <strong>font files themselves</strong>
 keep their upstream licenses — OFL-1.1 for Atkinson Hyperlegible, Inter,

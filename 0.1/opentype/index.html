@@ -344,6 +344,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#variable-fonts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variable fonts
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hinting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hinting
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#api" class="md-nav__link">
     <span class="md-ellipsis">
       API
@@ -584,6 +602,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#variable-fonts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Variable fonts
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hinting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Hinting
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#api" class="md-nav__link">
     <span class="md-ellipsis">
       API
@@ -632,29 +668,59 @@ TrueType/OpenType fonts. It imports only <code>image</code>, <code>encoding/bina
 <code>errors</code> and friends — no <code>golang.org/x/*</code>, no third-party modules — so it
 builds for every Go target including <code>GOOS=js GOARCH=wasm</code>.</p>
 <p>It exists to functionally replace the narrow slice of
-<code>golang.org/x/image/font/opentype</code> that a glyph-blitting UI needs: parse a
-font blob, build a face at a pixel size, then pull per-rune advances and
-8-bit alpha coverage masks.</p>
+<code>golang.org/x/image/font/opentype</code> that a glyph-blitting UI needs — parse a
+font blob, build a face at a pixel size, pull per-rune advances and 8-bit
+alpha coverage masks — and then goes further: CFF/CFF2 outlines, variable
+fonts, GPOS/GSUB shaping, kerning and TrueType/CFF hinting are all in scope.</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nx">f</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">opentype</span><span class="p">.</span><span class="nx">Parse</span><span class="p">(</span><span class="nx">ttf</span><span class="p">)</span><span class="w"> </span><span class="c1">// ttf is a []byte TrueType/OpenType blob</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nx">ttf</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">os</span><span class="p">.</span><span class="nx">ReadFile</span><span class="p">(</span><span class="s">&quot;MyFont.ttf&quot;</span><span class="p">)</span><span class="w"> </span><span class="c1">// or .otf (CFF/CFF2)</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="p">}</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nx">face</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">NewFace</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span><span class="w"> </span><span class="c1">// 16px per em</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="nx">m</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">face</span><span class="p">.</span><span class="nx">Metrics</span><span class="p">()</span><span class="w">             </span><span class="c1">// Metrics{Ascent, Descent, Height} in pixels</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="nx">w</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">face</span><span class="p">.</span><span class="nx">Measure</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">)</span><span class="w">      </span><span class="c1">// total advance width in pixels</span>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="nx">adv</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">face</span><span class="p">.</span><span class="nx">Advance</span><span class="p">(</span><span class="sc">&#39;H&#39;</span><span class="p">)</span><span class="w">        </span><span class="c1">// one rune&#39;s advance in pixels</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nx">f</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">opentype</span><span class="p">.</span><span class="nx">Parse</span><span class="p">(</span><span class="nx">ttf</span><span class="p">)</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">}</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="nx">face</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">NewFace</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span><span class="w"> </span><span class="c1">// 16px per em</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="c1">// Rasterise a glyph with (penX, baselineY) as the pen origin on the baseline.</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="nx">bounds</span><span class="p">,</span><span class="w"> </span><span class="nx">mask</span><span class="p">,</span><span class="w"> </span><span class="nx">maskp</span><span class="p">,</span><span class="w"> </span><span class="nx">advance</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">face</span><span class="p">.</span><span class="nx">GlyphMask</span><span class="p">(</span><span class="sc">&#39;H&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">penX</span><span class="p">,</span><span class="w"> </span><span class="nx">baselineY</span><span class="p">)</span>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="k">if</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">mask</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="c1">// Composite mask (an *image.Alpha coverage mask) onto your destination:</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="w">    </span><span class="c1">// pixel (maskp.X+i, maskp.Y+j) covers destination (bounds.Min.X+i, bounds.Min.Y+j).</span>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="p">}</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="nx">m</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">face</span><span class="p">.</span><span class="nx">Metrics</span><span class="p">()</span><span class="w">             </span><span class="c1">// Metrics{Ascent, Descent, Height} in pixels</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="nx">w</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">face</span><span class="p">.</span><span class="nx">Measure</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">)</span><span class="w">      </span><span class="c1">// total advance width in pixels</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="nx">adv</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">face</span><span class="p">.</span><span class="nx">Advance</span><span class="p">(</span><span class="sc">&#39;H&#39;</span><span class="p">)</span><span class="w">        </span><span class="c1">// one rune&#39;s advance in pixels</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="c1">// Rasterise a glyph with (penX, baselineY) as the pen origin on the baseline.</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="nx">bounds</span><span class="p">,</span><span class="w"> </span><span class="nx">mask</span><span class="p">,</span><span class="w"> </span><span class="nx">maskp</span><span class="p">,</span><span class="w"> </span><span class="nx">advance</span><span class="p">,</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">face</span><span class="p">.</span><span class="nx">GlyphMask</span><span class="p">(</span><span class="sc">&#39;H&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">penX</span><span class="p">,</span><span class="w"> </span><span class="nx">baselineY</span><span class="p">)</span>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="k">if</span><span class="w"> </span><span class="nx">ok</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">mask</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="c1">// Composite mask (an *image.Alpha coverage mask) onto your destination:</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="c1">// pixel (maskp.X+i, maskp.Y+j) covers destination (bounds.Min.X+i, bounds.Min.Y+j).</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="p">}</span>
 </code></pre></div>
 <p>The <code>GlyphMask</code> shape deliberately mirrors <code>x/image</code>'s <code>font.Face.Glyph</code>, so
 swapping this in for the x/image face is mechanical.</p>
+<h2 id="variable-fonts">Variable fonts<a class="headerlink" href="#variable-fonts" title="Permanent link">&para;</a></h2>
+<p>Instance a variable font at a specific point in its design space with
+<code>SetVariation</code>, keyed by axis tag (<code>wght</code>, <code>wdth</code>, <code>opsz</code>, ...):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nx">f</span><span class="p">,</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">opentype</span><span class="p">.</span><span class="nx">Parse</span><span class="p">(</span><span class="nx">interVariableTTF</span><span class="p">)</span><span class="w"> </span><span class="c1">// a variable-font .ttf</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">if</span><span class="w"> </span><span class="nx">err</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">nil</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="p">}</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nx">face</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">NewFace</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nx">face</span><span class="p">.</span><span class="nx">SetVariation</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">float64</span><span class="p">{</span><span class="s">&quot;wght&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">})</span><span class="w"> </span><span class="c1">// Semibold instance</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">ax</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">Axes</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">ax</span><span class="p">.</span><span class="nx">Tag</span><span class="p">,</span><span class="w"> </span><span class="nx">ax</span><span class="p">.</span><span class="nx">Min</span><span class="p">,</span><span class="w"> </span><span class="nx">ax</span><span class="p">.</span><span class="nx">Default</span><span class="p">,</span><span class="w"> </span><span class="nx">ax</span><span class="p">.</span><span class="nx">Max</span><span class="p">)</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="p">}</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="k">for</span><span class="w"> </span><span class="nx">_</span><span class="p">,</span><span class="w"> </span><span class="nx">ni</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="k">range</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">NamedInstances</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">ni</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span><span class="w"> </span><span class="nx">ni</span><span class="p">.</span><span class="nx">Coordinates</span><span class="p">)</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="p">}</span>
+</code></pre></div>
+<p><code>SetVariation</code> reinterpolates the glyph outlines (<code>gvar</code> for TrueType,
+CFF2 blends for CFF2) and re-derives <code>HVAR</code>/<code>VVAR</code>/<code>MVAR</code>-driven metrics for
+the chosen coordinates; <code>avar</code> axis-value mapping is applied automatically.</p>
+<h2 id="hinting">Hinting<a class="headerlink" href="#hinting" title="Permanent link">&para;</a></h2>
+<p><code>SetHinting(true)</code> runs the TrueType instruction interpreter (for <code>glyf</code>
+outlines) or the CFF/Type 2 stem grid-fitter (for CFF/CFF2 outlines) before
+rasterisation; <code>SetStemDarkening(true)</code> additionally applies CFF stem
+darkening. Both default to off (uniform 4×4-supersampled rendering).</p>
 <h2 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -666,7 +732,7 @@ swapping this in for the x/image face is mechanical.</p>
 <tbody>
 <tr>
 <td><code>Parse(b []byte) (*Font, error)</code></td>
-<td>Decode an sfnt font blob.</td>
+<td>Decode an sfnt (TrueType or CFF/OTTO) font blob.</td>
 </tr>
 <tr>
 <td><code>(*Font).NumGlyphs() int</code></td>
@@ -677,6 +743,26 @@ swapping this in for the x/image face is mechanical.</p>
 <td>Map a rune via the cmap.</td>
 </tr>
 <tr>
+<td><code>(*Font).GlyphIndexVariation(r, vs rune) (GlyphIndex, bool)</code></td>
+<td>Map a rune + Unicode variation selector.</td>
+</tr>
+<tr>
+<td><code>(*Font).Axes() []Axis</code></td>
+<td>Variable-font design axes (<code>fvar</code>).</td>
+</tr>
+<tr>
+<td><code>(*Font).NamedInstances() []NamedInstance</code></td>
+<td>Named positions in the variation space.</td>
+</tr>
+<tr>
+<td><code>(*Font).GPOS() *GPOS</code> / <code>(*Font).GSUB() *GSUB</code></td>
+<td>Parsed layout tables, or <code>nil</code>.</td>
+</tr>
+<tr>
+<td><code>(*Font).HasVerticalMetrics() bool</code></td>
+<td>Whether <code>vhea</code>/<code>vmtx</code> are present.</td>
+</tr>
+<tr>
 <td><code>(*Font).NewFace(sizePx int) *Face</code></td>
 <td>Build a sized face (scale = <code>sizePx / unitsPerEm</code>).</td>
 </tr>
@@ -685,52 +771,76 @@ swapping this in for the x/image face is mechanical.</p>
 <td><code>Ascent</code>, <code>Descent</code>, <code>Height</code> in pixels.</td>
 </tr>
 <tr>
-<td><code>(*Face).Advance(r rune) int</code></td>
-<td>Rune advance in pixels.</td>
+<td><code>(*Face).Advance(r rune) int</code> / <code>(*Face).Measure(s string) int</code></td>
+<td>Rune / string advance in pixels.</td>
 </tr>
 <tr>
-<td><code>(*Face).Measure(s string) int</code></td>
-<td>Sum of advances in pixels.</td>
+<td><code>(*Face).Kern(prev, r rune) int</code> / <code>(*Face).MeasureKerned(s string) int</code></td>
+<td>GPOS-or-<code>kern</code> pair adjustment.</td>
 </tr>
 <tr>
 <td><code>(*Face).GlyphMask(r, x, y) (image.Rectangle, *image.Alpha, image.Point, int, bool)</code></td>
 <td>Rasterised glyph + advance.</td>
 </tr>
+<tr>
+<td><code>(*Face).Shape(text string, features ...string) []GlyphIndex</code></td>
+<td>GSUB-substituted glyph run.</td>
+</tr>
+<tr>
+<td><code>(*Face).ShapePositioned(text string, features ...string) []PositionedGlyph</code></td>
+<td>GSUB + GPOS glyph run with pen offsets.</td>
+</tr>
+<tr>
+<td><code>(*Face).SetVariation(coords map[string]float64)</code></td>
+<td>Instance a variable font at the given axis coordinates.</td>
+</tr>
+<tr>
+<td><code>(*Face).SetHinting(on bool)</code> / <code>(*Face).SetStemDarkening(on bool)</code></td>
+<td>Toggle the TrueType/CFF hinter.</td>
+</tr>
+<tr>
+<td><code>(*Face).VerticalAdvance(r rune) int</code> / <code>(*Face).VerticalOrigin(r rune) (int, bool)</code></td>
+<td>Vertical writing-mode metrics.</td>
+</tr>
 </tbody>
 </table>
 <p>A <code>Font</code> is immutable after <code>Parse</code> and safe for concurrent use. A <code>Face</code>
-caches rasterised glyphs and is <strong>not</strong> safe for concurrent use.</p>
+caches rasterised glyphs and is <strong>not</strong> safe for concurrent use; build one
+<code>Face</code> per goroutine if needed.</p>
 <h2 id="support-matrix">Support matrix<a class="headerlink" href="#support-matrix" title="Permanent link">&para;</a></h2>
-<p>Supported (phase 1 — TrueType <code>glyf</code> outlines):</p>
 <ul>
-<li>sfnt container (<code>0x00010000</code> and <code>true</code> magic), table directory</li>
+<li>sfnt container (<code>0x00010000</code> and <code>true</code> TrueType magics, <code>OTTO</code> CFF magic)</li>
 <li><code>head</code>, <code>maxp</code>, <code>hhea</code>, <code>hmtx</code> (including the trailing-run shared advance)</li>
-<li><code>cmap</code> formats <strong>4</strong> (BMP) and <strong>12</strong> (full Unicode), preferring 12</li>
+<li><code>cmap</code> formats <strong>0, 2, 4, 6, 8, 10, 12, 13</strong> and <strong>14</strong> (Unicode variation
+  sequences), preferring 12</li>
 <li><code>loca</code> (short and long), <code>glyf</code> simple glyphs (repeat flags, short/long
   deltas) and composite glyphs (<code>ARGS_ARE_XY_VALUES</code>, scale / x&amp;y-scale / 2×2,
   <code>MORE_COMPONENTS</code>, with cycle and depth guards)</li>
 <li>implied on-curve midpoint synthesis for quadratic contours</li>
+<li>CFF and CFF2 (<code>OTTO</code>) Type 2 charstring outlines, including subroutines,
+  <code>seac</code> accent composition, and CFF2 variable-font blend operators</li>
+<li><code>fvar</code> axes and named instances, <code>avar</code> axis-value mapping,
+  <code>gvar</code>/CFF2 glyph-outline interpolation, <code>HVAR</code>/<code>VVAR</code>/<code>MVAR</code> metric
+  variation, via <code>(*Face).SetVariation</code></li>
+<li>every <code>GSUB</code>/<code>GPOS</code> lookup type — ligatures, contextual and positional-form
+  substitution (<code>isol</code>/<code>init</code>/<code>medi</code>/<code>fina</code>), single/pair/cursive
+  positioning, mark-to-base and mark-to-mark attachment — plus <code>GDEF</code> and
+  lookup-flag mark filtering</li>
+<li>kerning via GPOS pair positioning with legacy <code>kern</code>-table fallback,
+  through a single <code>Kerner</code></li>
+<li>a TrueType instruction hinter and a CFF/Type 2 stem grid-fitter (blue
+  zones, counters, stem darkening), toggled per <code>Face</code> with <code>SetHinting</code> /
+  <code>SetStemDarkening</code></li>
+<li><code>vhea</code>/<code>vmtx</code>/<code>VORG</code>-aware vertical metrics and origins for vertical
+  writing modes</li>
 <li>anti-aliased rasterisation via 4×4 supersampling under the non-zero
   winding rule</li>
 </ul>
-<div class="admonition warning">
-<p class="admonition-title">Not yet implemented (roadmap)</p>
-<ul>
-<li><strong>CFF / OpenType (<code>OTTO</code>) outlines</strong> — <code>Parse</code> returns a clear error
-  for CFF/CFF2-flavoured fonts today.</li>
-<li><strong>GPOS / GSUB shaping</strong>, ligatures, contextual substitution — this is
-  the layer <a href="../shape/"><code>shape</code></a> composes on top once a font exposes it.</li>
-<li><strong>Kerning</strong> (<code>kern</code> table / GPOS pairs).</li>
-<li><strong>Hinting</strong> — TrueType instructions are parsed but not executed;
-  rasterisation is unhinted, uniform supersampling.</li>
-<li><strong>Vertical metrics</strong> (<code>vhea</code>/<code>vmtx</code>) and cmap formats other than 4/12.</li>
-<li><strong>OpenType Variations</strong> (variable fonts / <code>fvar</code>/<code>gvar</code>/<code>avar</code>) — not
-  supported; see <a href="../fonts/">fonts</a> for how the bundled variable-font
-  upstreams are pinned to a static default instance instead.</li>
-</ul>
-</div>
-<p>Rasterisation favours correctness and portability over the last drop of
-small-size sharpness.</p>
+<p>Rasterisation uses uniform supersampling (not the delta-hinted rasterisation
+of a native TrueType/CFF hinter's drop-out control), so it favours
+correctness and portability over the very last drop of small-size sharpness.
+This is a feature-complete engine on the paths HarfBuzz + FreeType cover —
+nothing above is a stub.</p>
 <h2 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">&para;</a></h2>
 <p>Tests never depend on an external font: they synthesise minimal-but-valid
 TrueType fonts in memory (table directory + <code>head</code>/<code>maxp</code>/<code>hhea</code>/<code>hmtx</code>/

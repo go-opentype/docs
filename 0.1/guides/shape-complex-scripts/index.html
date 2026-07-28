@@ -505,9 +505,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#whats-not-covered-yet" class="md-nav__link">
+  <a href="#indic-and-universal-shaping-engine-scripts" class="md-nav__link">
     <span class="md-ellipsis">
-      What's not covered yet
+      Indic and Universal Shaping Engine scripts
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vertical-cjk-tategaki-and-other-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vertical (CJK tategaki) and other scripts
     </span>
   </a>
   
@@ -604,9 +613,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#whats-not-covered-yet" class="md-nav__link">
+  <a href="#indic-and-universal-shaping-engine-scripts" class="md-nav__link">
     <span class="md-ellipsis">
-      What's not covered yet
+      Indic and Universal Shaping Engine scripts
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vertical-cjk-tategaki-and-other-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vertical (CJK tategaki) and other scripts
     </span>
   </a>
   
@@ -690,13 +708,32 @@ a Latin-only UI string that happens to contain an Arabic punctuation mark
 you don't want triggering cursive joining:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nx">glyphs</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">shape</span><span class="p">.</span><span class="nx">Shape</span><span class="p">(</span><span class="nx">face</span><span class="p">,</span><span class="w"> </span><span class="nx">text</span><span class="p">,</span><span class="w"> </span><span class="nx">shape</span><span class="p">.</span><span class="nx">Options</span><span class="p">{</span><span class="nx">Script</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;latn&quot;</span><span class="p">})</span>
 </code></pre></div>
-<h2 id="whats-not-covered-yet">What's not covered yet<a class="headerlink" href="#whats-not-covered-yet" title="Permanent link">&para;</a></h2>
-<p>Indic, Thai/Lao, Khmer, Myanmar, and anything needing the Universal Shaping
-Engine fall back to the default (unreordered) path today — see
-<a href="../../shape/#scope">shape's scope</a>. If your text is confined to Arabic and
-Latin/default scripts (which also covers Cyrillic, Greek, and CJK without
-reordering needs), <code>shape.Shape</code> is a complete solution; otherwise treat the
-output as best-effort for those scripts.</p>
+<h2 id="indic-and-universal-shaping-engine-scripts">Indic and Universal Shaping Engine scripts<a class="headerlink" href="#indic-and-universal-shaping-engine-scripts" title="Permanent link">&para;</a></h2>
+<p>Devanagari, Bengali, Tamil, and the rest of the ten dedicated-shaper Indic
+scripts get the full HarfBuzz "indic" model: syllable splitting, base/reph
+detection, the pre-base-matra and reph reordering passes, and the layered
+GSUB/GPOS feature pipeline (including mark/mkmk/abvm/blwm attachment):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nx">glyphs</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">shape</span><span class="p">.</span><span class="nx">Shape</span><span class="p">(</span><span class="nx">face</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;नमस्ते&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">shape</span><span class="p">.</span><span class="nx">Options</span><span class="p">{})</span><span class="w"> </span><span class="c1">// Devanagari &quot;hello&quot;</span>
+</code></pre></div>
+<p>Thai, Lao, Khmer, Myanmar, Tibetan and the rest of the scripts without a
+bespoke shaper go through the Universal Shaping Engine (USE), which
+classifies each run into syllabic categories, splits it into clusters,
+reorders pre-base vowels/modifiers and repha, and runs the USE GSUB/GPOS
+pipeline (with sakot/halant joining, split-vowel decomposition, and
+dotted-circle insertion for defective clusters) — no code changes needed
+beyond calling <code>shape.Shape</code>, since script detection is automatic. See
+<a href="../../shape/#scope">shape's scope</a> for the full list of scripts each model
+covers.</p>
+<h2 id="vertical-cjk-tategaki-and-other-scripts">Vertical (CJK tategaki) and other scripts<a class="headerlink" href="#vertical-cjk-tategaki-and-other-scripts" title="Permanent link">&para;</a></h2>
+<p>Egyptian Hieroglyph quadrats and Hangul jamo composition are also handled
+automatically from the script of the input text. For vertical writing mode
+(CJK tategaki — top-to-bottom, <code>vert</code>/<code>vrt2</code> glyph forms), set
+<code>Options.Vertical</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nx">glyphs</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">shape</span><span class="p">.</span><span class="nx">Shape</span><span class="p">(</span><span class="nx">face</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;こんにちは&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">shape</span><span class="p">.</span><span class="nx">Options</span><span class="p">{</span><span class="nx">Vertical</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">})</span>
+</code></pre></div>
+<p><code>shape.Shape</code> is a complete solution across all of these paths — Arabic,
+Indic, USE, Egyptian Hieroglyphs, Hangul, vertical, and Latin/default
+(which also covers Cyrillic, Greek, and horizontal CJK).</p>
 
 
 

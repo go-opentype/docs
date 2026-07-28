@@ -629,26 +629,47 @@
 <p><code>github.com/go-opentype/shape</code> is a pure-Go, <code>CGO_ENABLED=0</code>,
 <strong>standard-library-only</strong> complex-text shaper — a HarfBuzz-lite for the
 go-opentype stack. It turns a run of Unicode text into positioned glyphs in
-<strong>visual order</strong>, so real Arabic (and Latin) renders correctly instead of as
-isolated, unattached glyphs.</p>
+<strong>visual order</strong>, so Arabic, Indic, Southeast-Asian, CJK vertical and
+Egyptian Hieroglyph text renders correctly instead of as isolated,
+unattached, unreordered glyphs.</p>
 <p>It composes two siblings and adds nothing else: bidi reordering from
 <a href="../bidi/"><code>bidi</code></a> and GSUB/GPOS-driven substitution/positioning from
 <a href="../opentype/"><code>opentype</code></a>. No <code>golang.org/x/*</code>, no third-party modules; it
 builds for every Go target including <code>GOOS=js GOARCH=wasm</code>.</p>
 <h2 id="what-it-does">What it does<a class="headerlink" href="#what-it-does" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Bidirectional reordering</strong> — resolves UAX #9 embedding levels and lays
-  the glyphs out left-to-right, so a right-to-left Arabic run is emitted in
-  drawing order.</li>
+<li><strong>Bidirectional reordering</strong> — resolves UAX #9 embedding levels (via
+  <a href="../bidi/"><code>bidi</code></a>) and lays the glyphs out left-to-right, so a
+  right-to-left run is emitted in drawing order.</li>
 <li><strong>Arabic cursive joining</strong> — resolves each letter's joining form
   (isolated / initial / medial / final) and applies the font's
   <code>isol</code>/<code>init</code>/<code>medi</code>/<code>fina</code> GSUB features <strong>positionally</strong>, each only at
   the glyphs in that form. Joining forms are tracked through <code>ccmp</code>
   decomposition (the rasm-skeleton-plus-dots architecture real fonts such as
   Noto Sans Arabic use), so the joined glyphs actually connect.</li>
+<li><strong>Indic shaping</strong> — Devanagari, Bengali, Gurmukhi, Gujarati, Oriya, Tamil,
+  Telugu, Kannada, Malayalam and Sinhala, via the HarfBuzz "indic" model:
+  syllable splitting, base/reph detection, two reordering passes (pre-base
+  matras and reph), the full basic + presentation GSUB feature pipeline, and
+  GPOS mark/mkmk/abvm/blwm attachment.</li>
+<li><strong>Universal Shaping Engine (USE)</strong> — the general complex-script model for
+  scripts without a bespoke shaper: Thai, Lao, Khmer, Myanmar, Tibetan,
+  Javanese, Balinese, Buginese, Tai Tham and more. Runs are classified into
+  USE syllabic categories, split into clusters, reordered (pre-base vowels
+  and modifiers before the base, repha after it) and run through the USE
+  GSUB/GPOS pipeline, with sakot/halant joining, split-vowel decomposition
+  and dotted-circle insertion for defective clusters.</li>
+<li><strong>Egyptian Hieroglyph quadrats</strong> — the Unicode format-control characters
+  U+13430–U+1345F (joiners, corner insertions, overlays, segment/enclosure
+  delimiters) are parsed into a two-dimensional quadrat tree and laid out
+  geometrically, so a run of signs renders as compact blocks.</li>
+<li><strong>Hangul</strong> — jamo composition into precomposed syllable blocks.</li>
+<li><strong>Vertical writing mode (CJK tategaki)</strong> — <code>Options.Vertical</code> selects the
+  <code>vert</code>/<code>vrt2</code> upright glyph forms and stacks glyphs top-to-bottom using the
+  font's vertical metrics (<code>vmtx</code>/<code>VORG</code>).</li>
 <li><strong>Ligatures, mark attachment, kerning</strong> — GSUB <code>ccmp</code>/<code>rlig</code>/<code>liga</code>/<code>calt</code>
-  then GPOS <code>kern</code>/<code>mark</code>/<code>mkmk</code>/<code>curs</code>, so diacritics sit on their base and
-  pairs kern.</li>
+  then GPOS <code>kern</code>/<code>mark</code>/<code>mkmk</code>/<code>curs</code> for every script path, so diacritics
+  sit on their base and pairs kern.</li>
 </ul>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
@@ -664,43 +685,42 @@ builds for every Go target including <code>GOOS=js GOARCH=wasm</code>.</p>
 <a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="c1">// g.Cluster  source rune index it derives from</span>
 <a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="w">    </span><span class="c1">// g.XOffset, g.YOffset   placement relative to the pen (px)</span>
 <a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="c1">// g.XAdvance, g.YAdvance advance to move the pen by (px)</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="p">}</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="c1">// g.Scale    draw scale (&lt; 1 inside an Egyptian quadrat)</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="p">}</span>
 </code></pre></div>
 <p>The base direction defaults to <code>Auto</code> (from the first strong character) and
-the script is auto-detected (any Arabic-block rune selects the Arabic
-shaper) unless you set <code>Options.Script</code> (<code>"arab"</code>, <code>"latn"</code>, <code>"dflt"</code>) or
-<code>Options.Direction</code>.</p>
+the script is auto-detected from the text (any Arabic-block rune selects
+Arabic, Indic/USE runes select their shaper, ...) unless you set
+<code>Options.Script</code> or <code>Options.Direction</code>.</p>
 <h2 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Glyph</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nx">GID</span><span class="w">      </span><span class="nx">opentype</span><span class="p">.</span><span class="nx">GlyphIndex</span>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nx">Cluster</span><span class="w">  </span><span class="kt">int</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nx">GID</span><span class="w">      </span><span class="nx">opentype</span><span class="p">.</span><span class="nx">GlyphIndex</span><span class="w"> </span><span class="c1">// glyph to draw</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nx">Cluster</span><span class="w">  </span><span class="kt">int</span><span class="w">                 </span><span class="c1">// source rune index</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nx">XAdvance</span><span class="w"> </span><span class="kt">int</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="nx">YAdvance</span><span class="w"> </span><span class="kt">int</span>
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nx">XOffset</span><span class="w">  </span><span class="kt">int</span>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nx">YOffset</span><span class="w">  </span><span class="kt">int</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="p">}</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Options</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="nx">Direction</span><span class="w"> </span><span class="nx">bidi</span><span class="p">.</span><span class="nx">Direction</span><span class="w"> </span><span class="c1">// LeftToRight, RightToLeft, Auto</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="nx">Script</span><span class="w">    </span><span class="kt">string</span><span class="w">         </span><span class="c1">// &quot;arab&quot;, &quot;latn&quot;, &quot;dflt&quot;; empty auto-detects</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="nx">Features</span><span class="w">  </span><span class="p">[]</span><span class="kt">string</span><span class="w">       </span><span class="c1">// extra feature tags</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="p">}</span>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Shape</span><span class="p">(</span><span class="nx">face</span><span class="w"> </span><span class="o">*</span><span class="nx">opentype</span><span class="p">.</span><span class="nx">Face</span><span class="p">,</span><span class="w"> </span><span class="nx">text</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">opts</span><span class="w"> </span><span class="nx">Options</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="nx">Glyph</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="nx">Scale</span><span class="w">    </span><span class="kt">float64</span><span class="w"> </span><span class="c1">// 1.0 normally; &lt; 1 inside an Egyptian quadrat</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="p">}</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="kd">type</span><span class="w"> </span><span class="nx">Options</span><span class="w"> </span><span class="kd">struct</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="nx">Direction</span><span class="w"> </span><span class="nx">bidi</span><span class="p">.</span><span class="nx">Direction</span><span class="w"> </span><span class="c1">// LeftToRight, RightToLeft, Auto (default)</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="nx">Script</span><span class="w">    </span><span class="kt">string</span><span class="w">         </span><span class="c1">// &quot;arab&quot;, &quot;latn&quot;, &quot;dflt&quot;, a script tag, or &quot;&quot; to auto-detect</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="nx">Features</span><span class="w">  </span><span class="p">[]</span><span class="kt">string</span><span class="w">       </span><span class="c1">// extra feature tags applied over the whole run</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="nx">Vertical</span><span class="w">  </span><span class="kt">bool</span><span class="w">           </span><span class="c1">// CJK tategaki: top-to-bottom, vert/vrt2 forms</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="p">}</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="kd">func</span><span class="w"> </span><span class="nx">Shape</span><span class="p">(</span><span class="nx">face</span><span class="w"> </span><span class="o">*</span><span class="nx">opentype</span><span class="p">.</span><span class="nx">Face</span><span class="p">,</span><span class="w"> </span><span class="nx">text</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">opts</span><span class="w"> </span><span class="nx">Options</span><span class="p">)</span><span class="w"> </span><span class="p">[]</span><span class="nx">Glyph</span>
 </code></pre></div>
 <h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">&para;</a></h2>
-<p><strong>Implemented:</strong> Arabic and Latin/default (Latin, Cyrillic, Greek, CJK, …)
-shaping — cursive joining, ligatures, mark attachment, kerning, bidi visual
-order.</p>
-<div class="admonition warning">
-<p class="admonition-title">Out of scope today (future work)</p>
-<p>Scripts that need glyph reordering or a state machine — <strong>Indic</strong>
-(Devanagari, …), <strong>Thai/Lao</strong>, <strong>Khmer</strong>, <strong>Myanmar</strong>, and the
-<strong>Universal Shaping Engine</strong>. They currently shape through the default
-path (no reordering). Cluster indices are exact for one-to-one
-substitutions (the Arabic positional forms) and best-effort, monotonic,
-when a substitution changes the run length (ligatures, decomposition).</p>
-</div>
+<p><strong>Implemented:</strong> Arabic, the ten dedicated-shaper <strong>Indic</strong> scripts, the
+<strong>Universal Shaping Engine</strong> (Thai, Lao, Khmer, Myanmar, Tibetan, Javanese,
+Balinese, Buginese, Tai Tham, ...), <strong>Egyptian Hieroglyph</strong> quadrat layout,
+<strong>Hangul</strong> jamo composition, <strong>vertical</strong> writing mode, and
+<strong>Latin/default</strong> (Latin, Cyrillic, Greek, CJK horizontal, ...) shaping.</p>
+<p>Cluster indices are exact for one-to-one substitutions (the Arabic
+positional forms) and best-effort, monotonic, when a substitution changes
+the run length (ligatures, decomposition, Indic/USE reordering).</p>
 <p>Source: <a href="https://github.com/go-opentype/shape">github.com/go-opentype/shape</a> ·
 <a href="https://pkg.go.dev/github.com/go-opentype/shape">pkg.go.dev</a></p>
 
