@@ -1,6 +1,6 @@
 # Guide: choose an accessible font
 
-[`fonts`](../fonts.md) bundles 44 families so a Go program can ship legible
+[`fonts`](../fonts.md) bundles 46 families so a Go program can ship legible
 text without sourcing or downloading a `.ttf`. This guide is about picking
 the right one — not just the default.
 

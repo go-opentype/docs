@@ -1,12 +1,13 @@
 # fonts — bundled legible families
 
-`github.com/go-opentype/fonts` provides 44 legible, permissively-licensed
+`github.com/go-opentype/fonts` provides 46 legible, permissively-licensed
 TrueType fonts, one Go subpackage per family, each with its own
 `//go:embed` — no downloading, no sourcing a `.ttf` yourself, and **your
 binary links only the families you import**. Coverage spans Latin,
 Cyrillic and Greek plus seven non-Latin scripts — Arabic and Hebrew (RTL),
 Devanagari, Thai, Georgian, Armenian and Egyptian Hieroglyphs — plus Noto
-Sans SC for CJK (Han ideographs, kana and common CJK punctuation). Built
+Sans SC, JP and KR for CJK (Han ideographs, kana, Hangul and common CJK
+punctuation). Built
 for [opentype](opentype.md), the pure-Go, stdlib-only TrueType engine, but
 the raw bytes work with any parser that accepts a `.ttf`.
 
@@ -27,8 +28,8 @@ family is `//go:embed`ded into its own subpackage.
 
 `//go:embed` is eager *per package*: any package that embeds a font links
 that font's bytes into every binary that imports it, whether or not the
-binary ever uses it. A `fonts` package that bulk-embedded all 44 families
-would put all 44 into your binary the moment you imported it for anything
+binary ever uses it. A `fonts` package that bulk-embedded all 46 families
+would put all 46 into your binary the moment you imported it for anything
 at all.
 
 So the root `fonts` package doesn't do that. Each family lives in its own
@@ -47,11 +48,11 @@ The root `fonts` package holds two things only:
 
 ## Bundled fonts
 
-Six families are hand-curated (present since v0.1.0); the other thirty-eight
+Six families are hand-curated (present since v0.1.0); the other forty
 were ingested from [google/fonts](https://github.com/google/fonts). Seven
 non-Latin families (Arabic, Hebrew, Devanagari, Thai, Georgian, Armenian,
-Egyptian Hieroglyphs) and Noto Sans SC (the bundled CJK family) round out
-script coverage beyond Latin/Cyrillic/Greek.
+Egyptian Hieroglyphs) and Noto Sans SC, JP and KR (the bundled CJK families)
+round out script coverage beyond Latin/Cyrillic/Greek.
 
 | Name | Kind | License | Import path |
 | --- | --- | --- | --- |
@@ -69,6 +70,8 @@ script coverage beyond Latin/Cyrillic/Greek.
 | Noto Sans Armenian | Sans | OFL-1.1 | `github.com/go-opentype/fonts/notosansarmenian` |
 | Noto Sans Egyptian Hieroglyphs | Sans | OFL-1.1 | `github.com/go-opentype/fonts/notosansegyptianhieroglyphs` |
 | Noto Sans SC (CJK) | Sans | OFL-1.1 | `github.com/go-opentype/fonts/notosanssc` |
+| Noto Sans JP (CJK) | Sans | OFL-1.1 | `github.com/go-opentype/fonts/notosansjp` |
+| Noto Sans KR (CJK) | Sans | OFL-1.1 | `github.com/go-opentype/fonts/notosanskr` |
 | … 30 more Latin/Cyrillic/Greek families (Roboto, Open Sans, Montserrat, Fira Sans/Code, IBM Plex, …) | Sans/Serif/Mono | OFL-1.1 | see [pkg.go.dev](https://pkg.go.dev/github.com/go-opentype/fonts) for the full list |
 
 Full license texts are bundled verbatim under `licenses/` — one file per

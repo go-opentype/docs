@@ -135,6 +135,40 @@ bundled as [`testdata/STIXTwoMath-Regular.otf`](https://github.com/go-opentype/o
 in the `opentype` repository and is checked end-to-end in CI, alongside the
 synthetic MATH-table fixtures that give the decoder 100% branch coverage.
 
+## Font descriptors and subsetting
+
+For a program that *embeds* fonts — a PDF writer, a CSS `@font-face`
+generator — `opentype` exposes the writer-side primitives too:
+
+- **Descriptor scalars** from OS/2 and `head`/`post`, ready to fill a PDF
+  `/FontDescriptor` or a CSS declaration: `Ascent`, `Descent`, `LineGap`,
+  `FontBBox`, `CapHeight`, `XHeight`, `ItalicAngle`, `WeightClass`,
+  `WidthClass`, `StemV`, `Flags`, and the `IsFixedPitch`/`IsItalic`/`IsSerif`
+  booleans.
+- **Instancing** — `Instance(coords)` returns a new `*Font` baked to a single
+  point in a variable font's design space (glyf/CFF2 outlines and metrics
+  frozen), and `InstanceBytes(coords)` returns that instance as a fresh sfnt
+  blob.
+- **Subsetting** — `SubsetTrueType(gids)` cuts a TrueType font down to the
+  requested glyphs, closing composite-glyph dependencies and returning the
+  old→new glyph-id remap; `SubsetCFF(gids)` does the same for CFF/OTTO fonts,
+  closing `seac` accent references. Both keep only the glyphs a document
+  actually uses, so embedded fonts stay small.
+
+```go
+f, _ := opentype.Parse(ttf)
+
+// Descriptor scalars for a PDF /FontDescriptor.
+xMin, yMin, xMax, yMax := f.FontBBox()
+fmt.Println(f.Ascent(), f.Descent(), f.CapHeight(), f.StemV(), xMin, yMin, xMax, yMax)
+
+// Subset to the glyphs a document uses (here: 'H' and 'i').
+h, _ := f.GlyphIndex('H')
+i, _ := f.GlyphIndex('i')
+sub, oldToNew, _ := f.SubsetTrueType([]opentype.GlyphIndex{h, i})
+fmt.Println(len(sub), oldToNew)
+```
+
 ## API
 
 | Symbol | Purpose |
@@ -164,6 +198,10 @@ synthetic MATH-table fixtures that give the decoder 100% branch coverage.
 | `(*Face).TopAccentAttachment(gid GlyphIndex) (int, bool)` | X position (pixels) to centre a top accent over gid. |
 | `(*Face).MathKern(gid GlyphIndex, corner MathKernCorner, correctionHeight int) int` | Cut-in math kern (pixels) for one of gid's four corners at a given attachment height. |
 | `(*Face).MathVariants(gid GlyphIndex, vertical bool) ([]MathVariant, *MathAssembly)` | Size variants plus stretchy-glyph assembly for gid along one axis. |
+| `(*Font).Ascent/Descent/LineGap/FontBBox/CapHeight/XHeight/ItalicAngle/WeightClass/WidthClass/StemV/Flags/IsFixedPitch/IsItalic/IsSerif` | Font-descriptor scalars from OS/2 + `head`/`post` for PDF `/FontDescriptor` and CSS `@font-face`. |
+| `(*Font).Instance(coords map[string]float64) (*Font, error)` / `(*Font).InstanceBytes(coords) ([]byte, error)` | Bake a variable font to a static instance (`*Font` or a new sfnt blob). |
+| `(*Font).SubsetTrueType(gids []GlyphIndex) ([]byte, map[GlyphIndex]GlyphIndex, error)` | Subset a TrueType font to a glyph set, closing composites; returns the old→new id map. |
+| `(*Font).SubsetCFF(gids []GlyphIndex) ([]byte, error)` | Subset a CFF/OTTO font to a glyph set, closing `seac` accents. |
 
 A `Font` is immutable after `Parse` and safe for concurrent use. A `Face`
 caches rasterised glyphs and is **not** safe for concurrent use; build one
@@ -201,6 +239,12 @@ caches rasterised glyphs and is **not** safe for concurrent use; build one
   through a `Face` (`HasMath`, `MathConstant`, `ItalicCorrection`,
   `TopAccentAttachment`, `MathKern`, `MathVariants`,
   `IsExtendedShapeGlyph`); math *layout* is left to a higher-level engine
+- OS/2 + `head`/`post` **font-descriptor** scalars (`Ascent`, `Descent`,
+  `FontBBox`, `CapHeight`, `XHeight`, `ItalicAngle`, `WeightClass`,
+  `WidthClass`, `StemV`, `Flags`, …) for PDF and CSS embedding
+- **instancing** a variable font to a static master (`Instance`,
+  `InstanceBytes`) and **subsetting** to a glyph set (`SubsetTrueType` with
+  composite closure and an old→new id map, `SubsetCFF` with `seac` closure)
 - anti-aliased rasterisation via 4×4 supersampling under the non-zero
   winding rule
 

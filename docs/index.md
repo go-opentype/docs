@@ -18,7 +18,7 @@ packages and no cgo anywhere in the stack.
 | [`opentype`](opentype.md) | `github.com/go-opentype/opentype` | the engine — sfnt parsing + anti-aliased rasterisation |
 | [`bidi`](bidi.md) | `github.com/go-opentype/bidi` | the Unicode Bidirectional Algorithm (UAX #9) |
 | [`shape`](shape.md) | `github.com/go-opentype/shape` | a HarfBuzz-lite complex-text shaper composing the two above |
-| [`fonts`](fonts.md) | `github.com/go-opentype/fonts` | 44 bundled, legible, per-family `go:embed`ded font families |
+| [`fonts`](fonts.md) | `github.com/go-opentype/fonts` | 46 bundled, legible, per-family `go:embed`ded font families |
 | [`docs`](https://github.com/go-opentype/docs) | — | this documentation site (MkDocs Material, versioned with mike) |
 | [`brand`](https://github.com/go-opentype/brand) | — | logo and brand assets |
 
@@ -64,15 +64,15 @@ go get github.com/go-opentype/fonts
 
 - [opentype](opentype.md) — the sfnt parser and rasteriser: fonts, `cmap`,
   TrueType `glyf` and CFF/CFF2 outlines, variable fonts, GSUB/GPOS shaping,
-  hinting, vertical metrics, the `MATH` table for math typesetting, and the
-  full support matrix.
+  hinting, vertical metrics, the `MATH` table for math typesetting, font
+  subsetting and descriptor accessors, and the full support matrix.
 - [bidi](bidi.md) — the UAX #9 engine and what it implements vs. defers to a
   shaper.
 - [shape](shape.md) — the complex-text shaper: Arabic cursive joining, Indic
   reordering, the Universal Shaping Engine, Egyptian Hieroglyph quadrats,
   Hangul, vertical layout, ligatures, mark attachment, kerning, and which
   scripts it covers.
-- [fonts](fonts.md) — the 44 bundled families and the per-family import
+- [fonts](fonts.md) — the 46 bundled families and the per-family import
   model to reach them.
 - **Guides** — task-oriented walkthroughs: rendering text to a PNG, shaping a
   mixed-direction Arabic string, and picking a bundled font for legibility.
