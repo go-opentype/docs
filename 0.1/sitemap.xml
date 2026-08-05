@@ -2,34 +2,34 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://go-opentype.github.io/docs/0.1/</loc>
-         <lastmod>2026-07-28</lastmod>
+         <lastmod>2026-08-05</lastmod>
     </url>
     <url>
          <loc>https://go-opentype.github.io/docs/0.1/bidi/</loc>
-         <lastmod>2026-07-28</lastmod>
+         <lastmod>2026-08-05</lastmod>
     </url>
     <url>
          <loc>https://go-opentype.github.io/docs/0.1/fonts/</loc>
-         <lastmod>2026-07-28</lastmod>
+         <lastmod>2026-08-05</lastmod>
     </url>
     <url>
          <loc>https://go-opentype.github.io/docs/0.1/opentype/</loc>
-         <lastmod>2026-07-28</lastmod>
+         <lastmod>2026-08-05</lastmod>
     </url>
     <url>
          <loc>https://go-opentype.github.io/docs/0.1/shape/</loc>
-         <lastmod>2026-07-28</lastmod>
+         <lastmod>2026-08-05</lastmod>
     </url>
     <url>
          <loc>https://go-opentype.github.io/docs/0.1/guides/choose-an-accessible-font/</loc>
-         <lastmod>2026-07-28</lastmod>
+         <lastmod>2026-08-05</lastmod>
     </url>
     <url>
          <loc>https://go-opentype.github.io/docs/0.1/guides/render-text-to-png/</loc>
-         <lastmod>2026-07-28</lastmod>
+         <lastmod>2026-08-05</lastmod>
     </url>
     <url>
          <loc>https://go-opentype.github.io/docs/0.1/guides/shape-complex-scripts/</loc>
-         <lastmod>2026-07-28</lastmod>
+         <lastmod>2026-08-05</lastmod>
     </url>
 </urlset>

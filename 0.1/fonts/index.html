@@ -626,13 +626,14 @@
 
 
 <h1 id="fonts-bundled-legible-families">fonts — bundled legible families<a class="headerlink" href="#fonts-bundled-legible-families" title="Permanent link">&para;</a></h1>
-<p><code>github.com/go-opentype/fonts</code> provides 44 legible, permissively-licensed
+<p><code>github.com/go-opentype/fonts</code> provides 46 legible, permissively-licensed
 TrueType fonts, one Go subpackage per family, each with its own
 <code>//go:embed</code> — no downloading, no sourcing a <code>.ttf</code> yourself, and <strong>your
 binary links only the families you import</strong>. Coverage spans Latin,
 Cyrillic and Greek plus seven non-Latin scripts — Arabic and Hebrew (RTL),
 Devanagari, Thai, Georgian, Armenian and Egyptian Hieroglyphs — plus Noto
-Sans SC for CJK (Han ideographs, kana and common CJK punctuation). Built
+Sans SC, JP and KR for CJK (Han ideographs, kana, Hangul and common CJK
+punctuation). Built
 for <a href="../opentype/">opentype</a>, the pure-Go, stdlib-only TrueType engine, but
 the raw bytes work with any parser that accepts a <code>.ttf</code>.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
@@ -648,8 +649,8 @@ family is <code>//go:embed</code>ded into its own subpackage.</p>
 <h2 id="the-lazy-at-compile-time-import-model">The lazy-at-compile-time import model<a class="headerlink" href="#the-lazy-at-compile-time-import-model" title="Permanent link">&para;</a></h2>
 <p><code>//go:embed</code> is eager <em>per package</em>: any package that embeds a font links
 that font's bytes into every binary that imports it, whether or not the
-binary ever uses it. A <code>fonts</code> package that bulk-embedded all 44 families
-would put all 44 into your binary the moment you imported it for anything
+binary ever uses it. A <code>fonts</code> package that bulk-embedded all 46 families
+would put all 46 into your binary the moment you imported it for anything
 at all.</p>
 <p>So the root <code>fonts</code> package doesn't do that. Each family lives in its own
 subpackage — <code>fonts/inter</code>, <code>fonts/roboto</code>, <code>fonts/jetbrainsmono</code>, and so
@@ -665,11 +666,11 @@ Importing ten subpackages links only those ten.</p>
    family requires importing its own subpackage.</li>
 </ol>
 <h2 id="bundled-fonts">Bundled fonts<a class="headerlink" href="#bundled-fonts" title="Permanent link">&para;</a></h2>
-<p>Six families are hand-curated (present since v0.1.0); the other thirty-eight
+<p>Six families are hand-curated (present since v0.1.0); the other forty
 were ingested from <a href="https://github.com/google/fonts">google/fonts</a>. Seven
 non-Latin families (Arabic, Hebrew, Devanagari, Thai, Georgian, Armenian,
-Egyptian Hieroglyphs) and Noto Sans SC (the bundled CJK family) round out
-script coverage beyond Latin/Cyrillic/Greek.</p>
+Egyptian Hieroglyphs) and Noto Sans SC, JP and KR (the bundled CJK families)
+round out script coverage beyond Latin/Cyrillic/Greek.</p>
 <table>
 <thead>
 <tr>
@@ -763,6 +764,18 @@ script coverage beyond Latin/Cyrillic/Greek.</p>
 <td>Sans</td>
 <td>OFL-1.1</td>
 <td><code>github.com/go-opentype/fonts/notosanssc</code></td>
+</tr>
+<tr>
+<td>Noto Sans JP (CJK)</td>
+<td>Sans</td>
+<td>OFL-1.1</td>
+<td><code>github.com/go-opentype/fonts/notosansjp</code></td>
+</tr>
+<tr>
+<td>Noto Sans KR (CJK)</td>
+<td>Sans</td>
+<td>OFL-1.1</td>
+<td><code>github.com/go-opentype/fonts/notosanskr</code></td>
 </tr>
 <tr>
 <td>… 30 more Latin/Cyrillic/Greek families (Roboto, Open Sans, Montserrat, Fira Sans/Code, IBM Plex, …)</td>
