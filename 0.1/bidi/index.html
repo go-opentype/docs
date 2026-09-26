@@ -746,40 +746,50 @@
 
 
 <h1 id="bidi-the-unicode-bidirectional-algorithm">bidi — the Unicode Bidirectional Algorithm<a class="headerlink" href="#bidi-the-unicode-bidirectional-algorithm" title="Permanent link">&para;</a></h1>
-<p><code>github.com/go-opentype/bidi</code> is a pure-Go, <code>CGO_ENABLED=0</code>,
+<p><code>github.com/go-typeset/bidi</code> is a pure-Go, <code>CGO_ENABLED=0</code>,
 <strong>standard-library-only</strong> implementation of the
 <a href="https://www.unicode.org/reports/tr9/">Unicode Bidirectional Algorithm (UAX #9)</a>
 for laying out mixed left-to-right / right-to-left text.</p>
 <p>Unlike most Go bidi implementations, it does <strong>not</strong> depend on
 <code>golang.org/x/text</code>. The <code>Bidi_Class</code> and paired-bracket Unicode properties
 are compiled into small generated lookup tables (see
-<a href="https://github.com/go-opentype/bidi/tree/main/cmd/genbidi"><code>cmd/genbidi</code></a>),
+<a href="https://github.com/go-typeset/bidi/tree/main/cmd/genbidi"><code>cmd/genbidi</code></a>),
 so the package builds anywhere the standard library does.</p>
+<div class="admonition warning">
+<p class="admonition-title">It moved, and the old import path fails</p>
+<p>This package used to be <code>github.com/go-opentype/bidi</code>. The transfer left a
+redirect, so the old <strong>link</strong> still opens — but the old <strong>import</strong> does not
+work, because the module declares the new path:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>$ go get github.com/go-opentype/bidi@latest
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>module declares its path as: github.com/go-typeset/bidi
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>        but was required as: github.com/go-opentype/bidi
+</code></pre></div>
+</div>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="s">"fmt"</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="s">"github.com/go-opentype/bidi"</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">)</span>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="c1">// A logical-order string mixing English and Hebrew.</span>
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"abc אבג def"</span>
-<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>
-<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="w">    </span><span class="c1">// Visual (left-to-right) order for display.</span>
-<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">bidi</span><span class="p">.</span><span class="nx">VisualOrder</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">bidi</span><span class="p">.</span><span class="nx">Auto</span><span class="p">))</span>
-<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
-<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="w">    </span><span class="c1">// Or work with levels directly.</span>
-<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="w">    </span><span class="nx">runes</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">rune</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
-<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="w">    </span><span class="nx">levels</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">bidi</span><span class="p">.</span><span class="nx">ResolveLevels</span><span class="p">(</span><span class="nx">runes</span><span class="p">,</span><span class="w"> </span><span class="nx">bidi</span><span class="p">.</span><span class="nx">LeftToRight</span><span class="p">)</span>
-<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a><span class="w">    </span><span class="nx">order</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">bidi</span><span class="p">.</span><span class="nx">Reorder</span><span class="p">(</span><span class="nx">runes</span><span class="p">,</span><span class="w"> </span><span class="nx">levels</span><span class="p">)</span><span class="w"> </span><span class="c1">// visual-order permutation of indices</span>
-<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">levels</span><span class="p">,</span><span class="w"> </span><span class="nx">order</span><span class="p">)</span>
-<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>
-<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">    </span><span class="c1">// Inspect a single rune's Bidi_Class.</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">bidi</span><span class="p">.</span><span class="nx">ClassOf</span><span class="p">(</span><span class="sc">'א'</span><span class="p">))</span><span class="w"> </span><span class="c1">// R</span>
-<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">package</span><span class="w"> </span><span class="nx">main</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">import</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="s">"fmt"</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="s">"github.com/go-typeset/bidi"</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="p">)</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="kd">func</span><span class="w"> </span><span class="nx">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="c1">// A logical-order string mixing English and Hebrew.</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">    </span><span class="nx">s</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="s">"abc אבג def"</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="c1">// Visual (left-to-right) order for display.</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">bidi</span><span class="p">.</span><span class="nx">VisualOrder</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span><span class="w"> </span><span class="nx">bidi</span><span class="p">.</span><span class="nx">Auto</span><span class="p">))</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">    </span><span class="c1">// Or work with levels directly.</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">    </span><span class="nx">runes</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="p">[]</span><span class="kt">rune</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">    </span><span class="nx">levels</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">bidi</span><span class="p">.</span><span class="nx">ResolveLevels</span><span class="p">(</span><span class="nx">runes</span><span class="p">,</span><span class="w"> </span><span class="nx">bidi</span><span class="p">.</span><span class="nx">LeftToRight</span><span class="p">)</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">    </span><span class="nx">order</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">bidi</span><span class="p">.</span><span class="nx">Reorder</span><span class="p">(</span><span class="nx">runes</span><span class="p">,</span><span class="w"> </span><span class="nx">levels</span><span class="p">)</span><span class="w"> </span><span class="c1">// visual-order permutation of indices</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">levels</span><span class="p">,</span><span class="w"> </span><span class="nx">order</span><span class="p">)</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">    </span><span class="c1">// Inspect a single rune's Bidi_Class.</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">    </span><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">bidi</span><span class="p">.</span><span class="nx">ClassOf</span><span class="p">(</span><span class="sc">'א'</span><span class="p">))</span><span class="w"> </span><span class="c1">// R</span>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="p">}</span>
 </code></pre></div>
 <h2 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h2>
 <table>
@@ -856,13 +866,13 @@ curated representative subset is embedded under <code>testdata</code> and run by
 <code>go vet</code>, <code>gofmt</code>, and cross-compilation for the six 64-bit architectures
 plus <code>js/wasm</code>, <code>darwin/arm64</code> and <code>windows/amd64</code>.</p>
 <h2 id="regenerating-the-tables">Regenerating the tables<a class="headerlink" href="#regenerating-the-tables" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>go<span class="w"> </span>run<span class="w"> </span>./cmd/genbidi<span class="w"> </span>.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>go<span class="w"> </span>run<span class="w"> </span>./cmd/genbidi<span class="w"> </span>.
 </code></pre></div>
 <p>This fetches the latest <code>DerivedBidiClass.txt</code> and <code>BidiBrackets.txt</code> from
 the Unicode Character Database and rewrites <code>bidiclass_table.go</code> and
 <code>bidibrackets_table.go</code>.</p>
-<p>Source: <a href="https://github.com/go-opentype/bidi">github.com/go-opentype/bidi</a> ·
-<a href="https://pkg.go.dev/github.com/go-opentype/bidi">pkg.go.dev</a></p>
+<p>Source: <a href="https://github.com/go-typeset/bidi">github.com/go-typeset/bidi</a> ·
+<a href="https://pkg.go.dev/github.com/go-typeset/bidi">pkg.go.dev</a></p>
 
 
 
