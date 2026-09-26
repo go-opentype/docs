@@ -1,6 +1,6 @@
 # bidi — the Unicode Bidirectional Algorithm
 
-`github.com/go-opentype/bidi` is a pure-Go, `CGO_ENABLED=0`,
+`github.com/go-typeset/bidi` is a pure-Go, `CGO_ENABLED=0`,
 **standard-library-only** implementation of the
 [Unicode Bidirectional Algorithm (UAX #9)](https://www.unicode.org/reports/tr9/)
 for laying out mixed left-to-right / right-to-left text.
@@ -8,8 +8,20 @@ for laying out mixed left-to-right / right-to-left text.
 Unlike most Go bidi implementations, it does **not** depend on
 `golang.org/x/text`. The `Bidi_Class` and paired-bracket Unicode properties
 are compiled into small generated lookup tables (see
-[`cmd/genbidi`](https://github.com/go-opentype/bidi/tree/main/cmd/genbidi)),
+[`cmd/genbidi`](https://github.com/go-typeset/bidi/tree/main/cmd/genbidi)),
 so the package builds anywhere the standard library does.
+
+!!! warning "It moved, and the old import path fails"
+
+    This package used to be `github.com/go-opentype/bidi`. The transfer left a
+    redirect, so the old **link** still opens — but the old **import** does not
+    work, because the module declares the new path:
+
+    ```
+    $ go get github.com/go-opentype/bidi@latest
+    module declares its path as: github.com/go-typeset/bidi
+            but was required as: github.com/go-opentype/bidi
+    ```
 
 ## Usage
 
@@ -19,7 +31,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/go-opentype/bidi"
+	"github.com/go-typeset/bidi"
 )
 
 func main() {
@@ -97,5 +109,5 @@ This fetches the latest `DerivedBidiClass.txt` and `BidiBrackets.txt` from
 the Unicode Character Database and rewrites `bidiclass_table.go` and
 `bidibrackets_table.go`.
 
-Source: [github.com/go-opentype/bidi](https://github.com/go-opentype/bidi) ·
-[pkg.go.dev](https://pkg.go.dev/github.com/go-opentype/bidi)
+Source: [github.com/go-typeset/bidi](https://github.com/go-typeset/bidi) ·
+[pkg.go.dev](https://pkg.go.dev/github.com/go-typeset/bidi)
