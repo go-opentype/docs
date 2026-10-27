@@ -1,13 +1,18 @@
-# Guide: shape complex scripts
+---
+title: "Shape complex scripts"
+weight: 80
+---
+
+# Guide: shape complex scripts {#guide-shape-complex-scripts}
 
 A plain per-rune advance loop (as in
-[Render text to a PNG](render-text-to-png.md)) is enough for isolated Latin
+[Render text to a PNG]({{< relref "render-text-to-png.md" >}})) is enough for isolated Latin
 text, but it breaks down for anything that needs **reordering** or
 **cursive joining** — a right-to-left Arabic run, or Arabic letters that
 must connect to their neighbours. That's what
-[`shape`](../shape.md) is for.
+[`shape`]({{< relref "../shape.md" >}}) is for.
 
-## A right-to-left Arabic string
+## A right-to-left Arabic string {#a-right-to-left-arabic-string}
 
 ```go
 package main
@@ -41,10 +46,10 @@ func main() {
 
 `shape.Shape` already returns the glyphs in **visual order** — left to right
 in drawing order — even though the source string is logically right-to-left.
-You do not call [`bidi`](../bidi.md) yourself for this; `shape` composes it
+You do not call [`bidi`]({{< relref "../bidi.md" >}}) yourself for this; `shape` composes it
 internally.
 
-## Mixed-direction text
+## Mixed-direction text {#mixed-direction-text}
 
 For a paragraph that mixes scripts (English embedded in Arabic, or vice
 versa), leave `Options.Direction` at its default `Auto`: the base direction
@@ -66,7 +71,7 @@ glyphs := shape.Shape(face, text, shape.Options{
 })
 ```
 
-## Forcing a script
+## Forcing a script {#forcing-a-script}
 
 Script is auto-detected (any rune in the Arabic block selects the Arabic
 shaper; everything else takes the Latin/default path). Override it with
@@ -78,7 +83,7 @@ you don't want triggering cursive joining:
 glyphs := shape.Shape(face, text, shape.Options{Script: "latn"})
 ```
 
-## Indic and Universal Shaping Engine scripts
+## Indic and Universal Shaping Engine scripts {#indic-and-universal-shaping-engine-scripts}
 
 Devanagari, Bengali, Tamil, and the rest of the ten dedicated-shaper Indic
 scripts get the full HarfBuzz "indic" model: syllable splitting, base/reph
@@ -96,10 +101,10 @@ reorders pre-base vowels/modifiers and repha, and runs the USE GSUB/GPOS
 pipeline (with sakot/halant joining, split-vowel decomposition, and
 dotted-circle insertion for defective clusters) — no code changes needed
 beyond calling `shape.Shape`, since script detection is automatic. See
-[shape's scope](../shape.md#scope) for the full list of scripts each model
+[shape's scope]({{< relref "../shape.md#scope" >}}) for the full list of scripts each model
 covers.
 
-## Vertical (CJK tategaki) and other scripts
+## Vertical (CJK tategaki) and other scripts {#vertical-cjk-tategaki-and-other-scripts}
 
 Egyptian Hieroglyph quadrats and Hangul jamo composition are also handled
 automatically from the script of the input text. For vertical writing mode

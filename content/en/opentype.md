@@ -1,4 +1,9 @@
-# opentype — the engine
+---
+title: "opentype"
+weight: 20
+---
+
+# opentype — the engine {#opentype-the-engine}
 
 `github.com/go-opentype/opentype` is a pure-Go, `CGO_ENABLED=0`,
 **standard-library-only** parser and anti-aliased rasteriser for
@@ -12,7 +17,7 @@ font blob, build a face at a pixel size, pull per-rune advances and 8-bit
 alpha coverage masks — and then goes further: CFF/CFF2 outlines, variable
 fonts, GPOS/GSUB shaping, kerning and TrueType/CFF hinting are all in scope.
 
-## Usage
+## Usage {#usage}
 
 ```go
 ttf, err := os.ReadFile("MyFont.ttf") // or .otf (CFF/CFF2)
@@ -40,7 +45,7 @@ if ok && mask != nil {
 The `GlyphMask` shape deliberately mirrors `x/image`'s `font.Face.Glyph`, so
 swapping this in for the x/image face is mechanical.
 
-## Variable fonts
+## Variable fonts {#variable-fonts}
 
 Instance a variable font at a specific point in its design space with
 `SetVariation`, keyed by axis tag (`wght`, `wdth`, `opsz`, ...):
@@ -65,14 +70,14 @@ for _, ni := range f.NamedInstances() {
 CFF2 blends for CFF2) and re-derives `HVAR`/`VVAR`/`MVAR`-driven metrics for
 the chosen coordinates; `avar` axis-value mapping is applied automatically.
 
-## Hinting
+## Hinting {#hinting}
 
 `SetHinting(true)` runs the TrueType instruction interpreter (for `glyf`
 outlines) or the CFF/Type 2 stem grid-fitter (for CFF/CFF2 outlines) before
 rasterisation; `SetStemDarkening(true)` additionally applies CFF stem
 darkening. Both default to off (uniform 4×4-supersampled rendering).
 
-## Mathematical typesetting (the `MATH` table)
+## Mathematical typesetting (the `MATH` table) {#mathematical-typesetting-the-math-table}
 
 `opentype` decodes the OpenType **`MATH`** table: the font-level metrics a
 math-typesetting engine (LuaTeX, unicode-math, MathJax, Word's equation
@@ -135,7 +140,7 @@ bundled as [`testdata/STIXTwoMath-Regular.otf`](https://github.com/go-opentype/o
 in the `opentype` repository and is checked end-to-end in CI, alongside the
 synthetic MATH-table fixtures that give the decoder 100% branch coverage.
 
-## Font descriptors and subsetting
+## Font descriptors and subsetting {#font-descriptors-and-subsetting}
 
 For a program that *embeds* fonts — a PDF writer, a CSS `@font-face`
 generator — `opentype` exposes the writer-side primitives too:
@@ -169,7 +174,7 @@ sub, oldToNew, _ := f.SubsetTrueType([]opentype.GlyphIndex{h, i})
 fmt.Println(len(sub), oldToNew)
 ```
 
-## WOFF2 and binary size
+## WOFF2 and binary size {#woff2-and-binary-size}
 
 **Status: on main, in the next release** (merged, not yet tagged).
 
@@ -187,7 +192,7 @@ Open item (a trade-off, not a fix): `dsnet/compress/brotli` inflates about
 1.37x slower, roughly 0.4 ms for a 200 KB font. It is accepted for the size
 and the bound, and recorded here so it can be revisited.
 
-## API
+## API {#api}
 
 | Symbol | Purpose |
 | --- | --- |
@@ -225,7 +230,7 @@ A `Font` is immutable after `Parse` and safe for concurrent use. A `Face`
 caches rasterised glyphs and is **not** safe for concurrent use; build one
 `Face` per goroutine if needed.
 
-## Support matrix
+## Support matrix {#support-matrix}
 
 - sfnt container (`0x00010000` and `true` TrueType magics, `OTTO` CFF magic)
 - `head`, `maxp`, `hhea`, `hmtx` (including the trailing-run shared advance)
@@ -272,7 +277,7 @@ correctness and portability over the very last drop of small-size sharpness.
 This is a feature-complete engine on the paths HarfBuzz + FreeType cover —
 nothing above is a stub.
 
-## Testing
+## Testing {#testing}
 
 Tests never depend on an external font to reach 100% coverage: they
 synthesise minimal-but-valid TrueType and CFF fonts in memory (table

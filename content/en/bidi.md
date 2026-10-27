@@ -1,4 +1,9 @@
-# bidi — the Unicode Bidirectional Algorithm
+---
+title: "bidi"
+weight: 30
+---
+
+# bidi — the Unicode Bidirectional Algorithm {#bidi-the-unicode-bidirectional-algorithm}
 
 `github.com/go-typeset/bidi` is a pure-Go, `CGO_ENABLED=0`,
 **standard-library-only** implementation of the
@@ -11,19 +16,22 @@ are compiled into small generated lookup tables (see
 [`cmd/genbidi`](https://github.com/go-typeset/bidi/tree/main/cmd/genbidi)),
 so the package builds anywhere the standard library does.
 
-!!! warning "It moved, and the old import path fails"
+{{< callout type="warning" >}}
+**It moved, and the old import path fails**
 
-    This package used to be `github.com/go-opentype/bidi`. The transfer left a
-    redirect, so the old **link** still opens — but the old **import** does not
-    work, because the module declares the new path:
 
-    ```
-    $ go get github.com/go-opentype/bidi@latest
-    module declares its path as: github.com/go-typeset/bidi
-            but was required as: github.com/go-opentype/bidi
-    ```
+This package used to be `github.com/go-opentype/bidi`. The transfer left a
+redirect, so the old **link** still opens — but the old **import** does not
+work, because the module declares the new path:
 
-## Usage
+```
+$ go get github.com/go-opentype/bidi@latest
+module declares its path as: github.com/go-typeset/bidi
+        but was required as: github.com/go-opentype/bidi
+```
+{{< /callout >}}
+
+## Usage {#usage}
 
 ```go
 package main
@@ -52,7 +60,7 @@ func main() {
 }
 ```
 
-## API
+## API {#api}
 
 | Symbol | Purpose |
 | --- | --- |
@@ -65,7 +73,7 @@ func main() {
 | `Direction` | `LeftToRight`, `RightToLeft`, `Auto` |
 | `Level` | embedding level (even = LTR, odd = RTL) |
 
-## Implemented vs. deferred
+## Implemented vs. deferred {#implemented-vs-deferred}
 
 **Implemented** — the algorithm runs through rule **L2**, the full extent
 covered by the Unicode conformance file `BidiCharacterTest.txt`:
@@ -86,11 +94,11 @@ covered by the Unicode conformance file `BidiCharacterTest.txt`:
 - **L3** (combining marks) and **L4** (glyph mirroring of paired brackets
   and other mirrored characters) — `VisualOrder` does not substitute
   mirrored glyphs; that belongs to the rendering/shaping stage.
-- Arabic cursive **shaping / joining** — see [shape](shape.md).
+- Arabic cursive **shaping / joining** — see [shape]({{< relref "shape.md" >}}).
 - **P1** paragraph splitting — the caller drives it; the API operates per
   paragraph (an inline `Paragraph_Separator` is still handled by X8/L1).
 
-## Conformance
+## Conformance {#conformance}
 
 The package is validated against the **entire** `BidiCharacterTest.txt`
 (all cases pass: paragraph level, per-character levels and visual order). A
@@ -99,7 +107,7 @@ curated representative subset is embedded under `testdata` and run by
 `go vet`, `gofmt`, and cross-compilation for the six 64-bit architectures
 plus `js/wasm`, `darwin/arm64` and `windows/amd64`.
 
-## Regenerating the tables
+## Regenerating the tables {#regenerating-the-tables}
 
 ```sh
 go run ./cmd/genbidi .

@@ -1,9 +1,14 @@
-# Guide: render text to a PNG
+---
+title: "Render text to a PNG"
+weight: 70
+---
+
+# Guide: render text to a PNG {#guide-render-text-to-a-png}
 
 This walks through the smallest useful pipeline: parse a bundled font,
 rasterise a string glyph-by-glyph into an `image.RGBA`, and write it out as a
-PNG. It only touches [`opentype`](../opentype.md) and
-[`fonts`](../fonts.md) — no shaping needed for a plain Latin string.
+PNG. It only touches [`opentype`]({{< relref "../opentype.md" >}}) and
+[`fonts`]({{< relref "../fonts.md" >}}) — no shaping needed for a plain Latin string.
 
 ```go
 package main
@@ -68,6 +73,6 @@ Key points:
 
 For anything beyond isolated Latin/default runs — Arabic, mixed-direction
 paragraphs, ligatures, mark attachment — swap the per-rune loop above for
-[`shape.Shape`](../shape.md), which returns a `[]Glyph` with `XOffset`/
+[`shape.Shape`]({{< relref "../shape.md" >}}), which returns a `[]Glyph` with `XOffset`/
 `YOffset`/`XAdvance`/`YAdvance` already resolved; see
-[Shape complex scripts](shape-complex-scripts.md).
+[Shape complex scripts]({{< relref "shape-complex-scripts.md" >}}).

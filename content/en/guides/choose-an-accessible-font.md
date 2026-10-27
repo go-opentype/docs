@@ -1,10 +1,15 @@
-# Guide: choose an accessible font
+---
+title: "Choose an accessible font"
+weight: 90
+---
 
-[`fonts`](../fonts.md) bundles 46 families so a Go program can ship legible
+# Guide: choose an accessible font {#guide-choose-an-accessible-font}
+
+[`fonts`]({{< relref "../fonts.md" >}}) bundles 46 families so a Go program can ship legible
 text without sourcing or downloading a `.ttf`. This guide is about picking
 the right one — not just the default.
 
-## Just want something legible? Use the default
+## Just want something legible? Use the default {#just-want-something-legible-use-the-default}
 
 ```go
 f, err := fonts.Parse(fonts.MostLegible())
@@ -17,7 +22,7 @@ most sans-serifs (`I`/`l`/`1`, `O`/`0`) are deliberately differentiated.
 That benefits every reader, not only low-vision ones, which is why it's the
 package default rather than an opt-in.
 
-## Picking by role
+## Picking by role {#picking-by-role}
 
 `fonts.All()` returns every bundled `Family`, each tagged with a `Kind`
 (`KindSans`, `KindSerif`, `KindMono`) so you can filter for a role rather
@@ -44,7 +49,7 @@ if ok {
 f, err := fonts.Parse(lora.TTF)
 ```
 
-## What's bundled, and why you'd pick it
+## What's bundled, and why you'd pick it {#whats-bundled-and-why-youd-pick-it}
 
 | Family | Kind | Best for |
 | --- | --- | --- |
@@ -55,25 +60,25 @@ f, err := fonts.Parse(lora.TTF)
 | Go Mono | Mono | Code, matching the Go sans above |
 | JetBrains Mono | Mono | Code, wider ligature-friendly monospace |
 
-## The variable-font caveat
+## The variable-font caveat {#the-variable-font-caveat}
 
 Inter, Lora, and JetBrains Mono ship as **variable fonts** upstream (a
 single file spanning a weight/width axis range). `go-opentype/fonts` pins
 each to its **default static instance** — the `.ttf` bundled here is one
 fixed weight, not the full variable range — to keep the bundle simple and
 small, not because the engine can't handle axes:
-[`opentype` fully supports OpenType Variations](../opentype.md#variable-fonts),
+[`opentype` fully supports OpenType Variations]({{< relref "../opentype.md#variable-fonts" >}}),
 including `SetVariation` to instance any axis coordinate. If your design
 needs a specific weight along an axis (e.g. Inter at 600 rather than its
 default 400), source that family's variable `.ttf` yourself — from
 [google/fonts](https://github.com/google/fonts), for instance — and drive it
 with `opentype.Parse` + `(*Face).SetVariation(map[string]float64{"wght": 600})`.
 
-## License obligations
+## License obligations {#license-obligations}
 
 The Go source in `fonts` is BSD-3-Clause, but the **font files themselves**
 keep their upstream licenses — OFL-1.1 for Atkinson Hyperlegible, Inter,
 Lora, and JetBrains Mono; BSD-3-Clause for Go/Go Mono. If you redistribute a
 binary that embeds these fonts, carry the corresponding license text from
-`licenses/` along with it; see [fonts](../fonts.md#bundled-fonts) for the
+`licenses/` along with it; see [fonts]({{< relref "../fonts.md#bundled-fonts" >}}) for the
 full table and copyright lines.
