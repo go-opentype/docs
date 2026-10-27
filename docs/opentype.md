@@ -169,6 +169,24 @@ sub, oldToNew, _ := f.SubsetTrueType([]opentype.GlyphIndex{h, i})
 fmt.Println(len(sub), oldToNew)
 ```
 
+## WOFF2 and binary size
+
+**Status: on main, in the next release** (merged, not yet tagged).
+
+WOFF2 fonts are inflated with the decoder-only
+`github.com/dsnet/compress/brotli`, no longer with
+`github.com/andybalholm/brotli`. The root package of `andybalholm/brotli`
+imports `net/http`, so the `init` of `net/http` and of `crypto/tls` was linked
+into every program that imported `opentype`: 1.8 MB of a 7.5 MB `GOOS=js` text
+program. The decoder-only package imports neither.
+
+The inflate is now bounded by the size the WOFF2 directory declares, at most
+256 MiB, so a decompression bomb is refused instead of allocated.
+
+Open item (a trade-off, not a fix): `dsnet/compress/brotli` inflates about
+1.37x slower, roughly 0.4 ms for a 200 KB font. It is accepted for the size
+and the bound, and recorded here so it can be revisited.
+
 ## API
 
 | Symbol | Purpose |
