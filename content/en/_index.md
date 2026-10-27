@@ -1,24 +1,32 @@
-# go-opentype documentation
+---
+title: "Overview"
+weight: 10
+---
+
+# go-opentype documentation {#go-opentype-documentation}
 
 **A pure-Go, zero-dependency TrueType/OpenType text stack.** Four small
 modules that together read a font file, resolve Unicode bidirectional and
 complex-script text, and rasterise the result — with no `golang.org/x/*`
 packages and no cgo anywhere in the stack.
 
-!!! success "Zero third-party dependencies"
-    Every module in the stack imports only the Go standard library
-    (`image`, `encoding/binary`, `math`, `errors`, …). That is what lets the
-    whole stack cross-compile trivially to any Go target, including
-    `GOOS=js GOARCH=wasm`, with no C toolchain and no vendored assets.
+{{< callout type="info" >}}
+**Zero third-party dependencies**
 
-## The modules
+Every module in the stack imports only the Go standard library
+(`image`, `encoding/binary`, `math`, `errors`, …). That is what lets the
+whole stack cross-compile trivially to any Go target, including
+`GOOS=js GOARCH=wasm`, with no C toolchain and no vendored assets.
+{{< /callout >}}
+
+## The modules {#the-modules}
 
 | Repo | Module path | What it is |
 | --- | --- | --- |
-| [`opentype`](opentype.md) | `github.com/go-opentype/opentype` | the engine — sfnt parsing + anti-aliased rasterisation |
-| [`bidi`](bidi.md) | `github.com/go-opentype/bidi` | the Unicode Bidirectional Algorithm (UAX #9) |
-| [`shape`](shape.md) | `github.com/go-opentype/shape` | a HarfBuzz-lite complex-text shaper composing the two above |
-| [`fonts`](fonts.md) | `github.com/go-opentype/fonts` | 46 bundled, legible, per-family `go:embed`ded font families |
+| [`opentype`]({{< relref "opentype.md" >}}) | `github.com/go-opentype/opentype` | the engine — sfnt parsing + anti-aliased rasterisation |
+| [`bidi`]({{< relref "bidi.md" >}}) | `github.com/go-opentype/bidi` | the Unicode Bidirectional Algorithm (UAX #9) |
+| [`shape`]({{< relref "shape.md" >}}) | `github.com/go-opentype/shape` | a HarfBuzz-lite complex-text shaper composing the two above |
+| [`fonts`]({{< relref "fonts.md" >}}) | `github.com/go-opentype/fonts` | 46 bundled, legible, per-family `go:embed`ded font families |
 | [`docs`](https://github.com/go-opentype/docs) | — | this documentation site (MkDocs Material, versioned with mike) |
 | [`brand`](https://github.com/go-opentype/brand) | — | logo and brand assets |
 
@@ -27,7 +35,7 @@ one that depends on its two siblings; `opentype`, `bidi`, and `fonts` have no
 intra-org dependencies of their own (`fonts` depends only on `opentype`'s
 `*Font` type for its `Parse` convenience wrapper).
 
-## What it replaces
+## What it replaces {#what-it-replaces}
 
 `go-opentype` exists to functionally replace, for a Go program that blits
 glyphs into a pixel buffer:
@@ -51,7 +59,7 @@ Engine (Thai, Lao, Khmer, Myanmar, Tibetan and more), Egyptian Hieroglyph
 quadrats, Hangul, vertical (CJK tategaki) layout, and Latin/default — see
 each module's page for its exact support matrix.
 
-## Install
+## Install {#install}
 
 ```sh
 go get github.com/go-opentype/opentype
@@ -60,19 +68,19 @@ go get github.com/go-opentype/shape
 go get github.com/go-opentype/fonts
 ```
 
-## Where to go next
+## Where to go next {#where-to-go-next}
 
-- [opentype](opentype.md) — the sfnt parser and rasteriser: fonts, `cmap`,
+- [opentype]({{< relref "opentype.md" >}}) — the sfnt parser and rasteriser: fonts, `cmap`,
   TrueType `glyf` and CFF/CFF2 outlines, variable fonts, GSUB/GPOS shaping,
   hinting, vertical metrics, the `MATH` table for math typesetting, font
   subsetting and descriptor accessors, and the full support matrix.
-- [bidi](bidi.md) — the UAX #9 engine and what it implements vs. defers to a
+- [bidi]({{< relref "bidi.md" >}}) — the UAX #9 engine and what it implements vs. defers to a
   shaper.
-- [shape](shape.md) — the complex-text shaper: Arabic cursive joining, Indic
+- [shape]({{< relref "shape.md" >}}) — the complex-text shaper: Arabic cursive joining, Indic
   reordering, the Universal Shaping Engine, Egyptian Hieroglyph quadrats,
   Hangul, vertical layout, ligatures, mark attachment, kerning, and which
   scripts it covers.
-- [fonts](fonts.md) — the 46 bundled families and the per-family import
+- [fonts]({{< relref "fonts.md" >}}) — the 46 bundled families and the per-family import
   model to reach them.
 - **Guides** — task-oriented walkthroughs: rendering text to a PNG, shaping a
   mixed-direction Arabic string, and picking a bundled font for legibility.

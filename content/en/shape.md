@@ -1,4 +1,9 @@
-# shape — the complex-text shaper
+---
+title: "shape"
+weight: 40
+---
+
+# shape — the complex-text shaper {#shape-the-complex-text-shaper}
 
 `github.com/go-opentype/shape` is a pure-Go, `CGO_ENABLED=0`,
 **standard-library-only** complex-text shaper — a HarfBuzz-lite for the
@@ -8,14 +13,14 @@ Egyptian Hieroglyph text renders correctly instead of as isolated,
 unattached, unreordered glyphs.
 
 It composes two siblings and adds nothing else: bidi reordering from
-[`bidi`](bidi.md) and GSUB/GPOS-driven substitution/positioning from
-[`opentype`](opentype.md). No `golang.org/x/*`, no third-party modules; it
+[`bidi`]({{< relref "bidi.md" >}}) and GSUB/GPOS-driven substitution/positioning from
+[`opentype`]({{< relref "opentype.md" >}}). No `golang.org/x/*`, no third-party modules; it
 builds for every Go target including `GOOS=js GOARCH=wasm`.
 
-## What it does
+## What it does {#what-it-does}
 
 - **Bidirectional reordering** — resolves UAX #9 embedding levels (via
-  [`bidi`](bidi.md)) and lays the glyphs out left-to-right, so a
+  [`bidi`]({{< relref "bidi.md" >}})) and lays the glyphs out left-to-right, so a
   right-to-left run is emitted in drawing order.
 - **Arabic cursive joining** — resolves each letter's joining form
   (isolated / initial / medial / final) and applies the font's
@@ -47,7 +52,7 @@ builds for every Go target including `GOOS=js GOARCH=wasm`.
   then GPOS `kern`/`mark`/`mkmk`/`curs` for every script path, so diacritics
   sit on their base and pairs kern.
 
-## Usage
+## Usage {#usage}
 
 ```go
 import (
@@ -72,7 +77,7 @@ the script is auto-detected from the text (any Arabic-block rune selects
 Arabic, Indic/USE runes select their shaper, ...) unless you set
 `Options.Script` or `Options.Direction`.
 
-## API
+## API {#api}
 
 ```go
 type Glyph struct {
@@ -95,7 +100,7 @@ type Options struct {
 func Shape(face *opentype.Face, text string, opts Options) []Glyph
 ```
 
-## Scope
+## Scope {#scope}
 
 **Implemented:** Arabic, the ten dedicated-shaper **Indic** scripts, the
 **Universal Shaping Engine** (Thai, Lao, Khmer, Myanmar, Tibetan, Javanese,

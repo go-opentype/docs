@@ -1,4 +1,9 @@
-# fonts — bundled legible families
+---
+title: "fonts"
+weight: 50
+---
+
+# fonts — bundled legible families {#fonts-bundled-legible-families}
 
 `github.com/go-opentype/fonts` provides 46 legible, permissively-licensed
 TrueType fonts, one Go subpackage per family, each with its own
@@ -8,7 +13,7 @@ Cyrillic and Greek plus seven non-Latin scripts — Arabic and Hebrew (RTL),
 Devanagari, Thai, Georgian, Armenian and Egyptian Hieroglyphs — plus Noto
 Sans SC, JP and KR for CJK (Han ideographs, kana, Hangul and common CJK
 punctuation). Built
-for [opentype](opentype.md), the pure-Go, stdlib-only TrueType engine, but
+for [opentype]({{< relref "opentype.md" >}}), the pure-Go, stdlib-only TrueType engine, but
 the raw bytes work with any parser that accepts a `.ttf`.
 
 ```go
@@ -24,7 +29,7 @@ face := f.NewFace(16)            // 16px face
 Pure Go, no cgo, no external assets to fetch at build or run time — every
 family is `//go:embed`ded into its own subpackage.
 
-## The lazy-at-compile-time import model
+## The lazy-at-compile-time import model {#the-lazy-at-compile-time-import-model}
 
 `//go:embed` is eager *per package*: any package that embeds a font links
 that font's bytes into every binary that imports it, whether or not the
@@ -46,7 +51,7 @@ The root `fonts` package holds two things only:
    package, so there's a sensible zero-extra-imports default. Every other
    family requires importing its own subpackage.
 
-## Bundled fonts
+## Bundled fonts {#bundled-fonts}
 
 Six families are hand-curated (present since v0.1.0); the other forty
 were ingested from [google/fonts](https://github.com/google/fonts). Seven
@@ -79,23 +84,29 @@ family (SIL Open Font License 1.1 for every `OFL-1.1` row, plus
 `GoFonts-LICENSE.txt` — BSD-3-Clause, Bigelow & Holmes — shared by Go and
 Go Mono).
 
-!!! success "The default: Atkinson Hyperlegible"
-    Designed by the Braille Institute specifically to maximize character
-    distinction for readers with low vision, benefiting every reader in the
-    process. [`MostLegible()`](#api) returns it, and it's the only family
-    embedded directly in the root package.
+{{< callout type="info" >}}
+**The default: Atkinson Hyperlegible**
 
-!!! info "Bundled instances are static; the engine itself supports variable fonts"
-    **Inter**, **Lora**, **JetBrains Mono**, and most of the
-    `google/fonts`-ingested set are variable fonts upstream; each bundled
-    `.ttf` is pinned at that family's default master (static instance) to
-    keep the bundle simple and small. That's a packaging choice, not an
-    engine limitation — [opentype](opentype.md#variable-fonts) fully
-    supports OpenType Variations via `(*Face).SetVariation`. If you need a
-    specific axis coordinate (e.g. Inter at weight 600), source that
-    family's variable `.ttf` yourself and parse it with `opentype.Parse`.
+Designed by the Braille Institute specifically to maximize character
+distinction for readers with low vision, benefiting every reader in the
+process. [`MostLegible()`](#api) returns it, and it's the only family
+embedded directly in the root package.
+{{< /callout >}}
 
-## API
+{{< callout type="info" >}}
+**Bundled instances are static; the engine itself supports variable fonts**
+
+**Inter**, **Lora**, **JetBrains Mono**, and most of the
+`google/fonts`-ingested set are variable fonts upstream; each bundled
+`.ttf` is pinned at that family's default master (static instance) to
+keep the bundle simple and small. That's a packaging choice, not an
+engine limitation — [opentype]({{< relref "opentype.md#variable-fonts" >}}) fully
+supports OpenType Variations via `(*Face).SetVariation`. If you need a
+specific axis coordinate (e.g. Inter at weight 600), source that
+family's variable `.ttf` yourself and parse it with `opentype.Parse`.
+{{< /callout >}}
+
+## API {#api}
 
 ```go
 type Kind int
@@ -126,7 +137,7 @@ e.g. `inter.TTF`, `roboto.TTF`, `jetbrainsmono.TTF` — see the table above
 and [pkg.go.dev](https://pkg.go.dev/github.com/go-opentype/fonts) for the
 full list of import paths.
 
-## License
+## License {#license}
 
 The Go source code in the repository (everything outside the bundled
 `.ttf` files and `licenses/`) is BSD-3-Clause. The bundled font files keep
