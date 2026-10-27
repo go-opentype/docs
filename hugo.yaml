@@ -30,11 +30,38 @@ theme: hextra
 defaultContentLanguage: en
 defaultContentLanguageInSubdir: false
 
+# Flags: lipis/flag-icons 4x3 (MIT, static/images/flags/LICENSE).
 languages:
   en:
     label: "English"
     contentDir: content/en
     weight: 1
+    params:
+      flag: images/flags/gb.svg
+  zh-cn:
+    label: "简体中文"
+    contentDir: content/zh-cn
+    weight: 2
+    params:
+      flag: images/flags/cn.svg
+      description: "纯 Go、零依赖的 TrueType/OpenType 文本栈：字体解析与光栅化、Unicode 双向文本、复杂文本整形、内置易读字体。"
+  ko:
+    label: "한국어"
+    contentDir: content/ko
+    weight: 3
+    params:
+      flag: images/flags/kr.svg
+      description: "순수 Go로 작성한 의존성 없는 TrueType/OpenType 텍스트 스택: 글꼴 파싱과 래스터화, 유니코드 양방향 텍스트, 복잡한 텍스트 셰이핑, 읽기 쉬운 내장 글꼴."
+  ja:
+    label: "日本語"
+    contentDir: content/ja
+    weight: 4
+    params:
+      flag: images/flags/jp.svg
+      description: "純粋な Go で書かれた依存関係のない TrueType/OpenType テキストスタック：フォントの解析とラスタライズ、Unicode 双方向テキスト、複雑なテキストのシェーピング、読みやすい同梱フォント。"
+
+# Word counts and summaries of the CJK pages count characters, not spaces.
+hasCJKLanguage: true
 
 enableRobotsTXT: true
 # Git history dates every page: "Last updated on" at the foot of each one.
@@ -44,6 +71,15 @@ markup:
   goldmark:
     renderer:
       unsafe: true
+    extensions:
+      # ⛔ CJK line breaks: a soft line break between two East Asian characters
+      # must not become a space (Chinese, Japanese), while between Korean words
+      # it must (Korean is written with spaces). css3draft does both; "simple"
+      # glues Korean words together.
+      cjk:
+        enable: true
+        eastAsianLineBreaks: true
+        eastAsianLineBreaksStyle: css3draft
     parser:
       attribute:
         title: true
@@ -75,6 +111,10 @@ params:
   docs:
     version: "v0.1.0"
   description: "A pure-Go, zero-dependency TrueType/OpenType text stack: font parsing + rasterisation, Unicode bidi, complex-text shaping, bundled legible fonts."
+  # The language switch (foot of the sidebar) shows the translate icon, then
+  # the language's flag.
+  languageSwitch:
+    icon: translate
   navbar:
     displayTitle: true
     displayLogo: true
