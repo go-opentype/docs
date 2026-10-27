@@ -416,6 +416,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#woff2-and-binary-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WOFF2 and binary size
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#api" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -762,6 +773,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#woff2-and-binary-size" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WOFF2 and binary size
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#api" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -960,6 +982,19 @@ generator — <code>opentype</code> exposes the writer-side primitives too:</p>
 <a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="nx">sub</span><span class="p">,</span><span class="w"> </span><span class="nx">oldToNew</span><span class="p">,</span><span class="w"> </span><span class="nx">_</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nx">f</span><span class="p">.</span><span class="nx">SubsetTrueType</span><span class="p">([]</span><span class="nx">opentype</span><span class="p">.</span><span class="nx">GlyphIndex</span><span class="p">{</span><span class="nx">h</span><span class="p">,</span><span class="w"> </span><span class="nx">i</span><span class="p">})</span>
 <a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">sub</span><span class="p">),</span><span class="w"> </span><span class="nx">oldToNew</span><span class="p">)</span>
 </code></pre></div>
+<h2 id="woff2-and-binary-size">WOFF2 and binary size<a class="headerlink" href="#woff2-and-binary-size" title="Permanent link">&para;</a></h2>
+<p><strong>Status: on main, in the next release</strong> (merged, not yet tagged).</p>
+<p>WOFF2 fonts are inflated with the decoder-only
+<code>github.com/dsnet/compress/brotli</code>, no longer with
+<code>github.com/andybalholm/brotli</code>. The root package of <code>andybalholm/brotli</code>
+imports <code>net/http</code>, so the <code>init</code> of <code>net/http</code> and of <code>crypto/tls</code> was linked
+into every program that imported <code>opentype</code>: 1.8 MB of a 7.5 MB <code>GOOS=js</code> text
+program. The decoder-only package imports neither.</p>
+<p>The inflate is now bounded by the size the WOFF2 directory declares, at most
+256 MiB, so a decompression bomb is refused instead of allocated.</p>
+<p>Open item (a trade-off, not a fix): <code>dsnet/compress/brotli</code> inflates about
+1.37x slower, roughly 0.4 ms for a 200 KB font. It is accepted for the size
+and the bound, and recorded here so it can be revisited.</p>
 <h2 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
